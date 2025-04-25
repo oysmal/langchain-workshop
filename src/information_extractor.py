@@ -3,7 +3,7 @@ from langchain.output_parsers.openai_functions import PydanticOutputFunctionsPar
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 # Define extraction schemas using Pydantic
 class CompanyInfo(BaseModel):
@@ -18,6 +18,56 @@ class InsuranceOffer(BaseModel):
     coverage_percentage: float = Field(description="Percentage of total insurance being offered")
     premium_amount: Optional[float] = Field(description="The premium amount if specified")
     coverage_type: str = Field(description="Type of insurance coverage")
+
+# New extraction schemas for the updated structure
+class AgreementInfo(BaseModel):
+    id: Optional[str] = Field(description="Agreement identifier")
+    name: Optional[str] = Field(description="Agreement name")
+    start_date: Optional[str] = Field(description="Start date of agreement validity")
+    end_date: Optional[str] = Field(description="End date of agreement validity")
+    products: Optional[List[str]] = Field(description="List of insurance products")
+    our_share: Optional[str] = Field(description="Our share percentage")
+    installments: Optional[int] = Field(description="Number of installments")
+    conditions: Optional[str] = Field(description="Agreement conditions")
+
+class PremiumInfo(BaseModel):
+    gross_premium: Optional[int] = Field(description="Gross premium amount")
+    brokerage_percent: Optional[int] = Field(description="Brokerage percentage")
+    net_premium: Optional[int] = Field(description="Net premium amount")
+
+class AccountingInfo(BaseModel):
+    paid: Optional[int] = Field(description="Amount paid")
+    amount_due: Optional[int] = Field(description="Amount due")
+    remaining: Optional[int] = Field(description="Remaining amount")
+    balance_percent: Optional[int] = Field(description="Balance percentage")
+
+class LossRatioInfo(BaseModel):
+    value_percent: Optional[int] = Field(description="Loss ratio percentage value")
+    claims: Optional[float] = Field(description="Claims amount")
+    premium: Optional[float] = Field(description="Premium amount")
+
+class RiskInfo(BaseModel):
+    technical_condition: Optional[int] = Field(description="Technical condition risk score (1-10)", ge=1, le=10)
+    operational_quality: Optional[int] = Field(description="Operational quality risk score (1-10)", ge=1, le=10)
+    crew_quality: Optional[int] = Field(description="Crew quality risk score (1-10)", ge=1, le=10)
+    management_quality: Optional[int] = Field(description="Management quality risk score (1-10)", ge=1, le=10)
+    claims_history: Optional[int] = Field(description="Claims history risk score (1-10)", ge=1, le=10)
+    financial_stability: Optional[int] = Field(description="Financial stability risk score (1-10)", ge=1, le=10)
+
+class ReinsuranceInfo(BaseModel):
+    net_tty: Optional[int] = Field(description="Net TTY amount")
+    net_fac: Optional[int] = Field(description="Net FAC amount")
+    net_retention: Optional[int] = Field(description="Net retention amount")
+    commission: Optional[float] = Field(description="Commission percentage")
+
+class ContactInfo(BaseModel):
+    name: Optional[str] = Field(description="Contact name")
+    role: Optional[str] = Field(description="Contact role")
+    email: Optional[str] = Field(description="Contact email")
+    phone: Optional[str] = Field(description="Contact phone number")
+
+class ObjectInfo(BaseModel):
+    name: Optional[str] = Field(description="Object name (e.g., company, vessel, etc.)")
 
 class InformationExtractor:
     def __init__(self, model_name="gpt-4.1"):
@@ -70,3 +120,71 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         # Return as list to maintain compatibility with the rest of the code
         return [results]
+    
+    def extract_agreement_info(self, documents):
+        """Extract agreement information from documents"""
+        extraction_chain = self._create_extraction_chain(AgreementInfo)
+        text_content = "\n\n".join([doc.page_content for doc in documents])
+        results = extraction_chain.invoke(text_content)
+        # Return as list to maintain compatibility with the rest of the code
+        return [results]
+    
+    def extract_premium_info(self, documents):
+        """Extract premium information from documents"""
+        extraction_chain = self._create_extraction_chain(PremiumInfo)
+        text_content = "\n\n".join([doc.page_content for doc in documents])
+        results = extraction_chain.invoke(text_content)
+        # Return as list to maintain compatibility with the rest of the code
+        return [results]
+    
+    def extract_accounting_info(self, documents):
+        """Extract accounting information from documents"""
+        extraction_chain = self._create_extraction_chain(AccountingInfo)
+        text_content = "\n\n".join([doc.page_content for doc in documents])
+        results = extraction_chain.invoke(text_content)
+        # Return as list to maintain compatibility with the rest of the code
+        return [results]
+    
+    def extract_loss_ratio_info(self, documents):
+        """Extract loss ratio information from documents"""
+        extraction_chain = self._create_extraction_chain(LossRatioInfo)
+        text_content = "\n\n".join([doc.page_content for doc in documents])
+        results = extraction_chain.invoke(text_content)
+        # Return as list to maintain compatibility with the rest of the code
+        return [results]
+    
+    def extract_risk_info(self, documents):
+        """Extract risk information from documents"""
+        extraction_chain = self._create_extraction_chain(RiskInfo)
+        text_content = "\n\n".join([doc.page_content for doc in documents])
+        results = extraction_chain.invoke(text_content)
+        # Return as list to maintain compatibility with the rest of the code
+        return [results]
+    
+    def extract_reinsurance_info(self, documents):
+        """Extract reinsurance information from documents"""
+        extraction_chain = self._create_extraction_chain(ReinsuranceInfo)
+        text_content = "\n\n".join([doc.page_content for doc in documents])
+        results = extraction_chain.invoke(text_content)
+        # Return as list to maintain compatibility with the rest of the code
+        return [results]
+    
+    def extract_contact_info(self, documents):
+        """Extract contact information from documents"""
+        extraction_chain = self._create_extraction_chain(ContactInfo)
+        text_content = "\n\n".join([doc.page_content for doc in documents])
+        results = extraction_chain.invoke(text_content)
+        # Return as list to maintain compatibility with the rest of the code
+        return [results]
+    
+    def extract_objects(self, documents):
+        """Extract object information from documents"""
+        extraction_chain = self._create_extraction_chain(ObjectInfo)
+        text_content = "\n\n".join([doc.page_content for doc in documents])
+        
+        # For objects, we might have multiple entries, so we'll use a different approach
+        # First, extract a single object to see if it works
+        result = extraction_chain.invoke(text_content)
+        
+        # Return as list to maintain compatibility with the rest of the code
+        return [result]
