@@ -314,6 +314,32 @@ def main():
     print("\nCase Description:")
     print(db_entry.assessment.case_description)
     
+    # Print company incidents
+    print("\n=== COMPANY INCIDENTS ===")
+    if db_entry.company_history.incidents:
+        for incident in db_entry.company_history.incidents:
+            print(f"Date: {incident.date}")
+            print(f"Severity: {incident.severity}")
+            print(f"Description: {incident.description}")
+            print("---")
+    else:
+        print("No company incidents found.")
+    
+    # Print vessel incidents
+    print("\n=== VESSEL INCIDENTS ===")
+    for imo, history in db_entry.vessel_histories.items():
+        vessel_name = next((v.name for v in db_entry.vessels if v.imo_number == imo), "Unknown")
+        print(f"\nVessel: {vessel_name} (IMO: {imo})")
+        
+        if history.incidents:
+            for incident in history.incidents:
+                print(f"Date: {incident.date}")
+                print(f"Severity: {incident.severity}")
+                print(f"Description: {incident.description}")
+                print("---")
+        else:
+            print("No incidents found for this vessel.")
+    
     return db_entry
 
 if __name__ == "__main__":
