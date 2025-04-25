@@ -26,6 +26,18 @@ maritime_insurance_tutorial/
 
 ## Setup
 
+TODO:
+explain how to install devbox
+explain:
+`cp .env.template .env.local`
+edit .env.local (add openai key)
+
+`$ devbox shell`
+`$ pip install -r requirements.txt`
+`$ python -m src.main`
+
+also, move data out of src, like README suggests?
+
 1. Install the required dependencies:
 
 ```bash
@@ -46,6 +58,7 @@ python src/main.py
 ```
 
 This will:
+
 1. Process the PDF and text documents
 2. Extract key information (company details, vessel IMO numbers, insurance offer)
 3. Look up vessel and company history
@@ -77,30 +90,37 @@ Uses LangGraph to create a multi-step workflow that ties all the components toge
 ## Workshop Flow
 
 1. **Introduction (10 minutes)**
+
    - Overview of the maritime insurance processing task
    - Introduction to LangChain and LangGraph
 
 2. **Document Processing (15 minutes)**
+
    - Explain document loaders
    - Implement the document processor
 
 3. **Information Extraction (15 minutes)**
+
    - Explain extraction chains
    - Implement the information extractor
 
 4. **Custom Tools (15 minutes)**
+
    - Explain custom tools in LangChain
    - Implement the history lookup tools
 
 5. **Risk Assessment (15 minutes)**
+
    - Explain LLM chains
    - Implement the risk assessor
 
 6. **Workflow Creation (15 minutes)**
+
    - Explain LangGraph
    - Implement the main workflow
 
 7. **Testing and Demonstration (15 minutes)**
+
    - Run the complete workflow
    - Discuss the results
 
@@ -116,3 +136,4 @@ Uses LangGraph to create a multi-step workflow that ties all the components toge
 4. How to use LLMs for assessment and summarization
 5. How to build a multi-step workflow using LangGraph
 6. How to use Pydantic for data modeling and validation
+
