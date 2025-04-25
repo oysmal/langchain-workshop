@@ -1,0 +1,31 @@
+OCEANTRANS SHIPPING COMPANY
+COMPANY PROFILE
+
+Company ID: OTS-2023-456
+Headquarters: Rotterdam, Netherlands
+Established: 1985
+
+FLEET INFORMATION:
+
+Vessel Name: MV Atlantic Voyager
+IMO Number: 9123456
+Type: Bulk Carrier
+Capacity: 75,000 DWT
+Year Built: 2015
+
+Vessel Name: MV Pacific Explorer
+IMO Number: 9234567
+Type: Container Ship
+Capacity: 8,500 TEU
+Year Built: 2018
+
+COMPANY OVERVIEW:
+OceanTrans Shipping is a mid-sized international shipping company specializing in bulk and container transport. The company operates primarily in European, Asian, and North American shipping routes, with a growing presence in specialized cargo transport. The company has been expanding its fleet with newer, more fuel-efficient vessels over the past five years.
+
+FINANCIAL SUMMARY:
+Annual Revenue: €450 million
+Total Assets: €1.2 billion
+Credit Rating: BBB+
+
+COMPLIANCE HISTORY:
+The company has maintained good standing with maritime authorities with occasional minor infractions. All vessels are certified under SOLAS and MARPOL regulations.
