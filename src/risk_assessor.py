@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI
-from langchain.chains import LLMChain
 from langchain.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
 
@@ -11,7 +11,7 @@ class RiskAssessment(BaseModel):
     recommendation: str = Field(description="Recommendation on whether to accept the insurance offer")
 
 class RiskAssessor:
-    def __init__(self, model_name="gpt-3.5-turbo"):
+    def __init__(self, model_name="gpt-4.1"):
         self.llm = ChatOpenAI(model=model_name)
         
         self.risk_template = ChatPromptTemplate.from_template("""
@@ -41,7 +41,16 @@ class RiskAssessor:
         - Recommendation (Accept/Reject/Request More Information)
         """)
         
-        self.risk_chain = LLMChain(llm=self.llm, prompt=self.risk_template)
+        # Create a chain that automatically parses the output into the RiskAssessment model
+        self.risk_chain = (
+            {"company_info": RunnablePassthrough(),
+             "vessel_info": RunnablePassthrough(),
+             "insurance_offer": RunnablePassthrough(),
+             "company_history": RunnablePassthrough(),
+             "vessel_history": RunnablePassthrough()}
+            | self.risk_template
+            | self.llm.with_structured_output(RiskAssessment)
+        )
     
     def generate_assessment(self, 
                            company_info: Dict, 
@@ -51,25 +60,11 @@ class RiskAssessor:
                            vessel_history: Dict) -> RiskAssessment:
         """Generate a risk assessment based on all available information"""
         
-        result = self.risk_chain.invoke({
+        # The chain now directly returns a RiskAssessment object
+        return self.risk_chain.invoke({
             "company_info": str(company_info),
             "vessel_info": str(vessel_info),
             "insurance_offer": str(insurance_offer),
             "company_history": str(company_history),
             "vessel_history": str(vessel_history)
         })
-        
-        # Parse the LLM output into structured format
-        # This is simplified for the tutorial - in a real app, we'd use more robust parsing
-        lines = result["text"].strip().split("\n")
-        risk_score = int([l for l in lines if "Risk Score" in l][0].split(":")[-1].strip())
-        company_desc = [l for l in lines if "Company Description" in l][0].split(":")[-1].strip()
-        case_desc = [l for l in lines if "Case Description" in l][0].split(":")[-1].strip()
-        recommendation = [l for l in lines if "Recommendation" in l][0].split(":")[-1].strip()
-        
-        return RiskAssessment(
-            risk_score=risk_score,
-            company_description=company_desc,
-            case_description=case_desc,
-            recommendation=recommendation
-        )

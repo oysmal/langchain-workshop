@@ -121,7 +121,7 @@ class InsuranceOffer(BaseModel):
     coverage_type: str = Field(description="Type of insurance coverage")
 
 class InformationExtractor:
-    def __init__(self, model_name="gpt-3.5-turbo"):
+    def __init__(self, model_name="gpt-4.1"):
         self.llm = ChatOpenAI(model=model_name)
     
     def extract_company_info(self, documents):
@@ -215,7 +215,7 @@ class RiskAssessment(BaseModel):
     recommendation: str = Field(description="Recommendation on whether to accept the insurance offer")
 
 class RiskAssessor:
-    def __init__(self, model_name="gpt-3.5-turbo"):
+    def __init__(self, model_name="gpt-4.1"):
         self.llm = ChatOpenAI(model=model_name)
         
         self.risk_template = ChatPromptTemplate.from_template("""

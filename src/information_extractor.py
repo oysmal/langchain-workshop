@@ -20,7 +20,7 @@ class InsuranceOffer(BaseModel):
     coverage_type: str = Field(description="Type of insurance coverage")
 
 class InformationExtractor:
-    def __init__(self, model_name="gpt-3.5-turbo"):
+    def __init__(self, model_name="gpt-4.1"):
         self.llm = ChatOpenAI(model=model_name)
     
     def _create_extraction_chain(self, schema_class):
