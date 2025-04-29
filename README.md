@@ -33,7 +33,11 @@ manager, which is very cool!)
 1. Install Devbox (either):
 
    - (a). see [this official link](https://www.jetify.com/docs/devbox/installing_devbox)
-   - (b). or, if you're on Mac or Linux just run `curl -fsSL https://get.jetify.com/devbox | bash`
+   - (b). or, if you're on Mac or Linux just run this command:
+
+   ```bash
+   curl -fsSL https://get.jetify.com/devbox | bash
+   ```
 
 2. Clone this repository
 
