@@ -6,7 +6,7 @@ from src.information_extractor import InformationExtractor
 from src.history_lookup import VesselHistoryTool, CompanyHistoryTool
 from src.risk_assessor import RiskAssessor
 from src.models import (
-        DatabaseEntry, Validity, Agreement, Premium, Accounting, LossRatio,
+        DatabaseEntry, Validity, Agreement, Premium, LossRatio,
         Risk, Reinsurance, Contact
         )
 from langchain_openai import ChatOpenAI
@@ -242,23 +242,6 @@ def create_db_entry(state):
             net_premium=premium_info.net_premium
         )
 
-    # Create Accounting object from financial_data.accounting_info
-    accounting = Accounting(
-        paid=None,
-        amount_due=None,
-        remaining=None,
-        balance_percent=None
-    )
-
-    if state["financial_data"].accounting_info:
-        accounting_info = state["financial_data"].accounting_info
-        accounting = Accounting(
-            paid=accounting_info.paid,
-            amount_due=accounting_info.amount_due,
-            remaining=accounting_info.remaining,
-            balance_percent=accounting_info.balance_percent
-        )
-
     # Create LossRatio object from financial_data.loss_ratio_info
     loss_ratio = LossRatio(
         value_percent=None,
@@ -336,7 +319,6 @@ def create_db_entry(state):
     db_entry = DatabaseEntry(
         agreement=agreement,
         premium=premium,
-        accounting=accounting,
         loss_ratio=loss_ratio,
         risk=risk,
         objects=objects_data,
@@ -394,16 +376,12 @@ def main():
     # Define input paths with absolute paths from project root
     inputs = {
             "pdf_paths": [
-                "src/data/prepared/GB_Shipping_Presentation.pdf",
-                "src/data/prepared/GB_Shipping_Maritime_Reinsurance_Contract.pdf",
+                "src/data/Bergen_Shipping_Company_Presentation_Final3.pdf",
+                "src/data/Maritime_Insurance_Proposal2.pdf",
                 ],
-            "excel_paths": [
-                "src/data/prepared/GB_Shipping_Fleet_Schedule.xlsx",
-                "src/data/prepared/GB_Shipping_HM_Loss_Record.xlsx",
-                "src/data/prepared/GB_Shipping_LOH_Loss_Record.xlsx",
-                ],
+            "excel_paths": [],
             "text_paths": [
-                "src/data/prepared/email.txt"
+                "src/data/broker_email.txt"
                 ]
             }
 

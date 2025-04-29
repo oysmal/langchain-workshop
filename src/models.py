@@ -23,13 +23,6 @@ class Premium(BaseModel):
     brokerage_percent: Optional[float] = None
     net_premium: Optional[float] = None
 
-class Accounting(BaseModel):
-    """Accounting information"""
-    paid: Optional[float] = None
-    amount_due: Optional[float] = None
-    remaining: Optional[float] = None
-    balance_percent: Optional[float] = None
-
 class LossRatio(BaseModel):
     """Loss ratio information"""
     value_percent: Optional[float] = None
@@ -67,7 +60,6 @@ class DatabaseEntry(BaseModel):
     """Final model for database entry"""
     agreement: Agreement = Field(default_factory=Agreement)
     premium: Premium = Field(default_factory=Premium)
-    accounting: Accounting = Field(default_factory=Accounting)
     loss_ratio: LossRatio = Field(default_factory=LossRatio)
     risk: Risk = Field(default_factory=Risk)
     objects: List[Dict] = []  # Objects associated with this entry

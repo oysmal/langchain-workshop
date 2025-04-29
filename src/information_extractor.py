@@ -42,12 +42,6 @@ class PremiumInfo(BaseModel):
     brokerage_percent: Optional[float] = Field(description="Brokerage percentage")
     net_premium: Optional[float] = Field(description="Net premium amount")
 
-class AccountingInfo(BaseModel):
-    paid: Optional[float] = Field(description="Amount paid")
-    amount_due: Optional[float] = Field(description="Amount due")
-    remaining: Optional[float] = Field(description="Remaining amount")
-    balance_percent: Optional[float] = Field(description="Balance percentage")
-
 class LossRatioInfo(BaseModel):
     value_percent: Optional[float] = Field(description="Loss ratio percentage value")
     claims: Optional[float] = Field(description="Claims amount")
@@ -76,7 +70,6 @@ class EntityData(BaseModel):
 
 class FinancialData(BaseModel):
     premium_info: Optional[PremiumInfo] = Field(description="Premium information")
-    accounting_info: Optional[AccountingInfo] = Field(description="Accounting information")
     loss_ratio_info: Optional[LossRatioInfo] = Field(description="Loss ratio information")
 
 class InsuranceRiskData(BaseModel):
@@ -150,7 +143,7 @@ class InformationExtractor:
         return self._ensure_pydantic_model(results, EntityData)
 
     def extract_financial_data(self, documents: List[Document]) -> FinancialData:
-        """Extract financial information including premium, accounting, and loss ratio
+        """Extract financial information including premium and loss ratio
 
         Args:
             documents: List of LangChain document objects
