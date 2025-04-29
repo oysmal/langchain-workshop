@@ -29,18 +29,22 @@ class LossRatio(BaseModel):
     claims: Optional[float] = None
     premium: Optional[float] = None
 
-class RiskCategories(BaseModel):
+class VesselClaimHistory(BaseModel):
+    claim_vessel_name: str = Field(description="Name of the vessel involved in the claim")
+    claim_vessel_imo: str = Field(description="IMO number of the vessel involved in the claim")
+    claim_date: str = Field(description="Date of the claim")
+    claim_amount: float = Field(description="Claim amount in standard resolution")
+    claim_description: str = Field(description="Description of the claim")
+
+class RiskInfo(BaseModel):
+    claim_history: Optional[List[VesselClaimHistory]] = Field(description="List of claims related to the vessel")
     technical_condition: Optional[int] = Field(description="Technical condition risk score (1-10)")
     operational_quality: Optional[int] = Field(description="Operational quality risk score (1-10)")
     crew_quality: Optional[int] = Field(description="Crew quality risk score (1-10)")
     management_quality: Optional[int] = Field(description="Management quality risk score (1-10)")
     claims_history: Optional[int] = Field(description="Claims history risk score (1-10)")
     financial_stability: Optional[int] = Field(description="Financial stability risk score (1-10)")
-
-class Risk(BaseModel):
-    """Risk assessment values by category ID"""
-    risk_categories: Optional[RiskCategories] = None
-
+    risk_score: Optional[int] = Field(description="Overall risk score (1-10)")
 class Reinsurance(BaseModel):
     """Reinsurance information"""
     net_tty: Optional[float] = None
@@ -61,18 +65,20 @@ class DatabaseEntry(BaseModel):
     agreement: Agreement = Field(default_factory=Agreement)
     premium: Premium = Field(default_factory=Premium)
     loss_ratio: LossRatio = Field(default_factory=LossRatio)
-    risk: Risk = Field(default_factory=Risk)
+    risk: RiskInfo = Field(default_factory=RiskInfo)
     objects: List[Dict] = []  # Objects associated with this entry
     reinsurance: Reinsurance = Field(default_factory=Reinsurance)
     contacts: List[Contact] = []
 
     # Additional fields requested by the user
+    overall_risk_score: Optional[int] = None  # Overall risk score from 1-10
     request_summary: Optional[str] = None  # Summary of the underwriting request
     recommendation: Optional[str] = None   # AI recommendation regarding the case
     points_of_attention: List[str] = []  # Points to pay attention to when reviewing
 
 
-class AdditionalInsights(BaseModel):
-    request_summary: str
-    recommendation: str
-    points_of_attention: List[str]
+class Assessment(BaseModel):
+    request_summary: str = Field(description="Summary of the underwriting request")
+    recommendation: str = Field(description="AI recommendation regarding the case")
+    overall_risk_score: int = Field(description="Overall risk score from 1-10")
+    points_of_attention: List[str] = Field(description="List of points to pay attention to when reviewing")

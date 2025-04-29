@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, TypeVar, Any
 from langchain_core.documents import Document
 
-from src.models import RiskCategories
+from src.models import RiskInfo
 
 # Base schemas for combined extraction models
 class CompanyInfo(BaseModel):
@@ -46,15 +46,6 @@ class LossRatioInfo(BaseModel):
     value_percent: Optional[float] = Field(description="Loss ratio percentage value")
     claims: Optional[float] = Field(description="Claims amount")
     premium: Optional[float] = Field(description="Premium amount")
-
-class RiskInfo(BaseModel):
-    technical_condition: Optional[int] = Field(description="Technical condition risk score (1-10)")
-    operational_quality: Optional[int] = Field(description="Operational quality risk score (1-10)")
-    crew_quality: Optional[int] = Field(description="Crew quality risk score (1-10)")
-    management_quality: Optional[int] = Field(description="Management quality risk score (1-10)")
-    claims_history: Optional[int] = Field(description="Claims history risk score (1-10)")
-    financial_stability: Optional[int] = Field(description="Financial stability risk score (1-10)")
-    risk_categories: Optional[RiskCategories] = Field(description="Risk values for specific categories")
 
 class ReinsuranceInfo(BaseModel):
     net_tty: Optional[float] = Field(description="Net TTY amount")
@@ -168,4 +159,6 @@ class InformationExtractor:
         extraction_chain = self._create_extraction_chain(InsuranceRiskData)
         text_content = "\n\n".join([doc.page_content for doc in documents])
         results = extraction_chain.invoke(text_content)
-        return self._ensure_pydantic_model(results, InsuranceRiskData)
+        model = self._ensure_pydantic_model(results, InsuranceRiskData)
+        print(f"Extracted Insurance Risk Data: {model.model_dump()}")
+        return model

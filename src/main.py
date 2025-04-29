@@ -1,14 +1,12 @@
 from langgraph.graph import StateGraph, END, START
-from typing import Dict, List, Any, TypedDict, Optional
+from typing import Dict, List, Any, TypedDict
 from src.document_processor import DocumentProcessor
 from src.information_extractor import InformationExtractor
 from src.history_lookup import VesselHistoryTool, CompanyHistoryTool
-from src.risk_assessor import RiskAssessor
-from src.models import (DatabaseEntry, Validity, RiskCategories, AdditionalInsights)
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from src.risk_assessor import Assessment, Assessor
+from src.models import (DatabaseEntry, Validity)
 from langchain_core.documents import Document
-from src.utils import get_risk_categories, get_vessel_objects, safe_model_dump
+from src.utils import get_vessel_objects, safe_model_dump
 
 def process_documents(state):
     """Process the documents and add them to the state"""
@@ -62,114 +60,25 @@ def lookup_history(state):
         "vessel_histories": vessel_histories,
     }
 
-def assess_risk(state):
-    """Generate risk assessment with simplified data handling"""
-    assessor = RiskAssessor()
-    
-    # Extract entity data with safe defaults
-    entity_data = state.get("entity_data", {})
-    insurance_risk_data = state.get("insurance_risk_data", {})
-    
-    # Get vessel info with simplified approach
-    vessel_info = {}
-    vessel_history = {}
-    if entity_data.vessel_info:
-        vessel_info = {v.imo_number: v.model_dump() for v in entity_data.vessel_info}
-        vessel_history = {imo: state["vessel_histories"].get(imo, {}) for imo in vessel_info}
-    
-    # Get company and insurance info with simplified approach
-    company_info = safe_model_dump(entity_data.company_info)
-    insurance_offer = safe_model_dump(insurance_risk_data.insurance_offer)
-    
+def assess(state):
+    """Generate an assessment"""
+    assessor = Assessor()
     # Generate assessment
-    assessment = assessor.generate_assessment(
-        company_info=company_info,
-        vessel_info=vessel_info,
-        insurance_offer=insurance_offer,
-        company_history=state.get("company_history", {}),
-        vessel_history=vessel_history
+    assessment = assessor.assess_case(
+        state
     )
     
     return {"assessment": assessment}
 
-def generate_additional_insights(state) -> AdditionalInsights:
-    """Generate additional insights for the database entry"""
-    llm = ChatOpenAI(model="gpt-4.1")
-
-    # Extract data with safe defaults
-    data = {
-        "company_info": state["entity_data"].company_info,
-        "vessel_info": state["entity_data"].vessel_info[0] if state["entity_data"].vessel_info else None,
-        "insurance_offer": state["insurance_risk_data"].insurance_offer,
-        "assessment": state.get("assessment", {}),
-        "agreement": state.get("agreement_data", {}),
-        "premium": state.get("premium_data", {}),
-        "risk": state.get("risk_data", {})
-    }
-
-    # Create a prompt with improved template
-    prompt = ChatPromptTemplate.from_template("""
-    You are a maritime insurance expert. Based on the following information, provide:
-
-    1. A concise summary of the underwriting request (2-3 sentences)
-    2. A clear recommendation regarding the case (Accept/Reject/Request More Information with brief justification)
-    3. A list of 3-5 specific points that the reviewer should pay attention to when reviewing this case
-
-    Company Information:
-    {company_info}
-
-    Vessel Information:
-    {vessel_info}
-
-    Insurance Offer:
-    {insurance_offer}
-
-    Risk Assessment:
-    {assessment}
-
-    Agreement Details:
-    {agreement}
-
-    Premium Information:
-    {premium}
-
-    Risk Data:
-    {risk}
-
-    Format your response as follows:
-
-    REQUEST SUMMARY: [Your summary here]
-
-    RECOMMENDATION: [Your recommendation here]
-
-    POINTS OF ATTENTION:
-    - [Point 1]
-    - [Point 2]
-    - [Point 3]
-    - [Point 4 if applicable]
-    - [Point 5 if applicable]
-    """)
-
-    # Prepare the input data dictionary with string conversions
-    input_data = {
-        "company_info": str(data["company_info"]),
-        "vessel_info": str(data["vessel_info"]),
-        "insurance_offer": str(data["insurance_offer"]),
-        "assessment": str(data["assessment"]),
-        "agreement": str(data["agreement"]),
-        "premium": str(data["premium"]),
-        "risk": str(data["risk"])
-    }
-
-    # Create and run the chain
-    chain = prompt | llm.with_structured_output(AdditionalInsights)
-    
-    # Generate insights
-    return chain.invoke(input_data)
-
 
 def create_db_entry(state):
     """Create the final database entry model using simplified approach"""
+    
+    # Debug logging to understand the state structure
+    print("DEBUG: State keys:", state.keys())
+    print("DEBUG: Assessment type:", type(state.get("assessment")))
+    if "assessment" in state:
+        print("DEBUG: Assessment attributes:", dir(state["assessment"]))
     
     # Extract data from state with safe defaults
     entity_data = state.get("entity_data", {})
@@ -194,19 +103,15 @@ def create_db_entry(state):
         "agreement": agreement_data,
         "premium": safe_model_dump(financial_data.premium_info),
         "loss_ratio": safe_model_dump(financial_data.loss_ratio_info),
-        "risk": {"risk_categories": get_risk_categories(state)},
+        "risk": safe_model_dump(insurance_risk_data.risk_info),
         "objects": get_vessel_objects(entity_data),
         "reinsurance": safe_model_dump(insurance_risk_data.reinsurance_info),
         "contacts": [contact.model_dump() for contact in entity_data.contact_info] if entity_data.contact_info else [],
+        "recommendation": state["assessment"].recommendation if "assessment" in state else None,
+        "overall_risk_score": state["assessment"].overall_risk_score if "assessment" in state else None,
+        "points_of_attention": state["assessment"].points_of_attention if "assessment" in state else None,
+        "request_summary": state["assessment"].request_summary if "assessment" in state else None,
     }
-    
-    # Generate additional insights
-    insights = generate_additional_insights(state)
-    db_entry_data.update({
-        "request_summary": insights.request_summary,
-        "recommendation": insights.recommendation,
-        "points_of_attention": insights.points_of_attention,
-    })
     
     # Create the database entry using model_validate
     db_entry = DatabaseEntry.model_validate(db_entry_data)
@@ -236,22 +141,21 @@ def create_workflow():
     workflow.add_node("process_documents", process_documents)
     workflow.add_node("extract_information", extract_information)
     workflow.add_node("lookup_history", lookup_history)
-    workflow.add_node("assess_risk", assess_risk)
+    workflow.add_node("assess", assess)
     workflow.add_node("create_db_entry", create_db_entry)
 
     # Add edges
     workflow.add_edge(START, "process_documents")
     workflow.add_edge("process_documents", "extract_information")
     workflow.add_edge("extract_information", "lookup_history")
-    workflow.add_edge("lookup_history", "assess_risk")
-    workflow.add_edge("assess_risk", "create_db_entry")
+    workflow.add_edge("lookup_history", "assess")
+    workflow.add_edge("assess", "create_db_entry")
     workflow.add_edge("create_db_entry", END)
 
     # Compile the graph
     return workflow.compile()
 
 def main():
-    """Run the maritime insurance processing workflow"""
     # Create the workflow
     workflow = create_workflow()
 
@@ -279,8 +183,6 @@ def main():
     # Convert to JSON and print
     db_entry_json = db_entry.model_dump_json(indent=2)
     print(db_entry_json)
-
-    return db_entry
 
 if __name__ == "__main__":
     main()

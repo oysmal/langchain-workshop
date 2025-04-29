@@ -1,18 +1,4 @@
-from typing import Dict, List, Optional, Any
-from src.models import RiskCategories
-
-def get_risk_categories(state) -> Optional[RiskCategories]:
-    """Extract risk categories from state with proper fallbacks"""
-    if state["insurance_risk_data"].risk_info and state["insurance_risk_data"].risk_info.risk_categories:
-        return state["insurance_risk_data"].risk_info.risk_categories
-    
-    assessment = state.get("assessment", {})
-    if isinstance(assessment, dict) and "risk_categories" in assessment:
-        return assessment["risk_categories"]
-    elif hasattr(assessment, "risk_categories"):
-        return assessment.risk_categories
-    
-    return None
+from typing import Dict, List
 
 def get_vessel_objects(entity_data) -> List[Dict]:
     """Convert vessel info to objects format"""

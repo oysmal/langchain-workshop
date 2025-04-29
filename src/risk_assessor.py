@@ -1,26 +1,18 @@
+import json
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
-from pydantic import BaseModel, Field
-from typing import Dict, Optional
-
-from src.models import RiskCategories
-
-class RiskAssessment(BaseModel):
-    risk_score: int = Field(description="Overall risk score from 1-10, where 10 is highest risk")
-    company_description: str = Field(description="Brief description of the company")
-    case_description: str = Field(description="Summary of the insurance case")
-    recommendation: str = Field(description="Recommendation on whether to accept the insurance offer")
-    loss_ratio_percent: Optional[int] = Field(None, description="Loss ratio percentage")
-    risk_by_category: Optional[RiskCategories] = Field(None, description="Risk values for specific categories")
-
-class RiskAssessor:
+from src.models import Assessment
+class Assessor:
     def __init__(self, model_name="gpt-4.1"):
         self.llm = ChatOpenAI(model=model_name)
 
-        self.risk_template = ChatPromptTemplate.from_template("""
-        You are a maritime insurance risk assessor. Based on the following information,
-        provide a detailed risk assessment.
+        self.prompt = ChatPromptTemplate.from_template("""
+        You are a maritime insurance expert. Based on the following information, provide:
+
+        1. A concise summary of the underwriting request (2-3 sentences)
+        2. A clear recommendation regarding the case (Accept/Reject/Request More Information with brief justification)
+        3. An overall risk score from 1-10, where 10 is the highest risk
+        4. A list of 3-5 specific points that the reviewer should pay attention to when reviewing this case
 
         Company Information:
         {company_info}
@@ -31,60 +23,54 @@ class RiskAssessor:
         Insurance Offer:
         {insurance_offer}
 
-        Company History:
-        {company_history}
+        Risk Assessment:
+        {assessment}
 
-        Vessel History:
-        {vessel_history}
+        Agreement Details:
+        {agreement}
 
-        You must provide your assessment with all of the following required fields:
-        - risk_score: Overall Risk Score (1-10, where 10 is highest risk)
-        - company_description: Brief description of the company (2-3 sentences)
-        - case_description: Summary of the insurance case (2-3 sentences)
-        - recommendation: Your recommendation (Accept/Reject/Request More Information)
-        - loss_ratio_percent: Loss Ratio Percentage (0-100)
-        - risk_by_category: Risk values for specific categories as a dictionary with these keys:
-              "technical_condition": Technical condition risk score (1-10)
-              "operational_quality": Operational quality risk score (1-10)
-              "crew_quality": Crew quality risk score (1-10)
-              "management_quality": Management quality risk score (1-10)
-              "claims_history": Claims history risk score (1-10)
-              "financial_stability": Financial stability risk score (1-10)
+        Premium Information:
+        {premium}
 
-        All fields are required, do not omit any fields in your response.
+        Risk Data:
+        {risk}
+
+        Format your response as follows:
+
+        {model_schema}        
+
         """)
 
-        # Create a chain that automatically parses the output into the RiskAssessment model
-        self.risk_chain = (
-            {"company_info": RunnablePassthrough(),
-             "vessel_info": RunnablePassthrough(),
-             "insurance_offer": RunnablePassthrough(),
-             "company_history": RunnablePassthrough(),
-             "vessel_history": RunnablePassthrough()}
-            | self.risk_template
-            | self.llm.with_structured_output(RiskAssessment)
-        )
+        self.chain = self.prompt | self.llm.with_structured_output(Assessment)
 
-    def generate_assessment(self,
-                           company_info: Dict,
-                           vessel_info: Dict,
-                           insurance_offer: Dict,
-                           company_history: Dict,
-                           vessel_history: Dict) -> RiskAssessment:
-        """Generate a risk assessment based on all available information"""
 
-        result = self.risk_chain.invoke({
-            "company_info": str(company_info),
-            "vessel_info": str(vessel_info),
-            "insurance_offer": str(insurance_offer),
-            "company_history": str(company_history),
-            "vessel_history": str(vessel_history)
-        })
+    def assess_case(self, state) -> Assessment:
+        """Assess the case and generate insights"""
 
-        # Convert to RiskAssessment if it's a dict
-        if isinstance(result, dict):
-            assessment = RiskAssessment(**result)
-        else:
-            assessment = result
+        # Extract data with safe defaults
+        data = {
+            "company_info": state["entity_data"].company_info,
+            "vessel_info": [vessel.model_dump() for vessel in state["entity_data"].vessel_info],
+            "insurance_offer": state["insurance_risk_data"].insurance_offer,
+            "assessment": state.get("assessment", {}),
+            "agreement": state.get("agreement_data", {}),
+            "premium": state.get("premium_data", {}),
+            "risk": state.get("risk_data", {})
+        }
 
-        return assessment
+        # Prepare the input data dictionary with string conversions
+        input_data = {
+            "company_info": str(data["company_info"]),
+            "vessel_info": str(data["vessel_info"]),
+            "insurance_offer": str(data["insurance_offer"]),
+            "assessment": str(data["assessment"]),
+            "agreement": str(data["agreement"]),
+            "premium": str(data["premium"]),
+            "risk": str(data["risk"]),
+            "model_schema": Assessment.schema_json(indent=2)
+        }
+        print(f"Input data for assessment: {json.dumps(input_data, indent=2)}")
+
+        res = self.chain.invoke(input_data)
+        print(f"Assessment result: {res}")
+        return res
