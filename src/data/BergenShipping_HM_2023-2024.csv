@@ -1,0 +1,6 @@
+Policy Year,Policy Interest,Vessel,IMO,Hull Value (€m),Machinery Value (€m),Gross Claim (€m),Gross Reserve (€m),Paid Net Claim (€m),Reserve Net Claim (€m),Total Claim Amount (€m),Status / Comments
+2023-2024,Hull & Machinery,MV Atlantic Voyager,9123456,85,15,0.0,0.0,0.0,0.0,0.0,No reported losses 2023‑2024
+2023-2024,Hull & Machinery,MV Pacific Explorer,9234567,95,20,0.0,0.0,0.0,0.0,0.0,No reported losses 2023‑2024
+2023-2024,Hull & Machinery,MV Atlantic Voyager,9123456,,,6.5,0.5,3.0,0.5,7.0,05 Dec 2023 – Bow collision damage (awaiting final repairs)
+2023-2024,Hull & Machinery,MV Atlantic Voyager,9123456,,,3.2,0.3,0.8,0.3,3.5,18 Mar 2024 – Port‑side crane impact while berthing
+TOTAL,,,,180.0,35.0,9.7,0.8,3.8,0.8,10.5,

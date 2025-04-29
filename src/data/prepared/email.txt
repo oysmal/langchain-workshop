@@ -4,11 +4,6 @@ Dear Ian Surer,
 
 I hope you are well. Thank you for your ongoing dialogue regarding North-Sea tonnage; please accept my apologies for the brief delay in forwarding the full submission.
 
-⸻
-
-Risk Summary
-
-Company overview
 GB Shipping plc was founded in 2002 in London to provide short-sea and offshore support services. Today it owns and operates 40 vessels (about 1.2 million DWT) and is the second-largest privately held UK-flag fleet. Long-term charters with blue-chip energy majors and liner companies underpin its earnings.
 
 Fleet details
@@ -18,12 +13,7 @@ Fleet details
 • 4 subsea/ROV support vessels – average age 6.2 years – North-Sea oil, gas and wind projects
 • 3 LNG-electric hybrid MPSVs – average age 2.1 years – offshore wind and decommissioning work
 
-Growth strategy
 Five additional hybrid MPSVs are on order for delivery 2026–2027, targeting the 19 GW UK offshore-wind build-out and the decommissioning of 470 legacy North-Sea platforms.
-
-⸻
-
-Risk Mitigation & Technology Investment
 
 GB Shipping has invested more than £24 million since 2021 in predictive analytics and safety technology, driving lower incident frequency.
 
@@ -32,8 +22,6 @@ GB Shipping has invested more than £24 million since 2021 in predictive analyti
 • AI-powered PPE and man-over-board video analytics – 180 IP cameras and AI models verify helmet, harness and life-vest compliance while triggering bridge alarms if a person falls overboard. Near-miss safety breaches fell 35 percent year-on-year and the company posted zero lost-time injuries in 2023.
 
 • Hybrid propulsion and smart weather-routing – the three LNG-electric MPSVs cut fuel consumption 25 percent and CO₂ emissions 19 kt per year, while routing software steers bulkers clear of heavy-weather risk, reducing damage claims.
-
-⸻
 
 Insurance Coverage Request
 
@@ -49,8 +37,6 @@ For the forthcoming renewal we seek separate terms for Hull & Machinery (all ves
 
 Relevant documentation—quote slip, fleet schedule, five-year loss record (split H&M and LOH) and the 2024 company presentation—is attached.
 
-⸻
-
 Timeline & Next Steps
 
 Our board will review offers on 25 May 2025. To allow internal evaluation and market support, we would appreciate receiving your terms by 17 May 2025.
@@ -61,9 +47,9 @@ Kind regards,
 
 James Hartley
 Insurance & Risk Manager
-GB Shipping plc
+Maritime Insurance Brokers Ltd.
 +44 20 7450 8800
-j.hartley@gb-shipping.co.uk
+j.hartley@maritimeinsurancebrokers.co.uk
 
 Attachments:
 	1.	Quote Slip – GB Shipping plc 2025/26 (H&M & LOH)
