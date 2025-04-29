@@ -70,3 +70,9 @@ class DatabaseEntry(BaseModel):
     request_summary: Optional[str] = None  # Summary of the underwriting request
     recommendation: Optional[str] = None   # AI recommendation regarding the case
     points_of_attention: List[str] = []  # Points to pay attention to when reviewing
+
+
+class AdditionalInsights(BaseModel):
+    request_summary: str
+    recommendation: str
+    points_of_attention: List[str]
