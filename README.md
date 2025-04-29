@@ -8,12 +8,12 @@ This tutorial demonstrates how to use LangChain and LangGraph to build a multi-s
 maritime_insurance_tutorial/
 ├── README.md
 ├── requirements.txt
-├── data/
-│   ├── company_info.pdf
-│   ├── insurance_offer.pdf
-│   ├── broker_email.txt
-│   └── mock_data.py
 ├── src/
+│   ├── data/
+│   │   ├── company_info.pdf
+│   │   ├── insurance_offer.pdf
+│   │   ├── broker_email.txt
+│   │   └── mock_data.py
 │   ├── main.py                  # Entry point that ties everything together
 │   ├── document_processor.py    # Document loading and text extraction
 │   ├── information_extractor.py # Extract key info from documents
@@ -26,38 +26,30 @@ maritime_insurance_tutorial/
 
 ## Setup
 
-TODO:
-explain how to install devbox
-explain:
-`cp .env.template .env.local`
-edit .env.local (add openai key)
+This workshop uses Devbox, which is an open source tool that gives you a shell with all the necessary requirements, such
+as the correct version of Python and a corresponding `venv`. (It does this declaratively by being built on the Nix package
+manager, which is very cool!)
 
-`$ devbox shell`
-`$ pip install -r requirements.txt`
-`$ python -m src.main`
+1. Install Devbox (either):
+   (a). see [this official link](https://www.jetify.com/docs/devbox/installing_devbox)
+   (b). or, if you're on Mac or Linux just run `curl -fsSL https://get.jetify.com/devbox | bash`
 
-also, move data out of src, like README suggests?
+2. Clone this repository
 
-1. Install the required dependencies:
+3. Prepare the API key for OpenAI:
 
-```bash
-pip install -r requirements.txt
-```
+   1. run the following command in this repository: `cp .env.template .env.local`
+   2. edit the new `.env.local` file and put your API key in the `OPENAI_API_KEY` variable
 
-2. Create sample PDF and text files in the `data` directory:
-   - `company_info.pdf`: A PDF containing company information and vessel IMO numbers
-   - `insurance_offer.pdf`: A PDF containing insurance offer details
-   - `broker_email.txt`: A text file containing the email cover text from the broker
+4. Start the devbox shell by running the command `devbox shell` (this might take a minute to install everything)
+
+5. Now inside the devbox shell, install python dependencies with the following command: `pip install -r requirements.txt`
+
+6. Test it out by running `python -m src.main`
 
 ## Running the Application
 
-To run the application, execute the following command:
-
-```bash
-python src/main.py
-```
-
-This will:
+this will:
 
 1. Process the PDF and text documents
 2. Extract key information (company details, vessel IMO numbers, insurance offer)
@@ -136,4 +128,3 @@ Uses LangGraph to create a multi-step workflow that ties all the components toge
 4. How to use LLMs for assessment and summarization
 5. How to build a multi-step workflow using LangGraph
 6. How to use Pydantic for data modeling and validation
-
