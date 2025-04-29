@@ -1,166 +1,119 @@
 from langgraph.graph import StateGraph, END, START
 from typing import Dict, List, Any, TypedDict
+from pydantic import BaseModel
 from src.document_processor import DocumentProcessor
 from src.information_extractor import InformationExtractor
 from src.history_lookup import VesselHistoryTool, CompanyHistoryTool
 from src.risk_assessor import RiskAssessor
 from src.models import (
-    DatabaseEntry, Validity, Agreement, Premium, Accounting, LossRatio,
-    Risk, Reinsurance, Contact, Company, Vessel, InsuranceDetails,
-    History, Incident, Claim, RiskAssessment as ModelsRiskAssessment,
-    LegacyDatabaseEntry
-)
-from src.risk_assessor import RiskAssessment as AssessorRiskAssessment
-from src.data.mock_data import (
-    AGREEMENT_DATA, PREMIUM_DATA, ACCOUNTING_DATA, LOSS_RATIO_DATA,
-    RISK_DATA, REINSURANCE_DATA, OBJECTS_DATA, CONTACTS_DATA
-)
-import json
+        DatabaseEntry, Validity, Agreement, Premium, Accounting, LossRatio,
+        Risk, Reinsurance, Contact
+        )
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
 
 def process_documents(state):
     """Process the documents and add them to the state"""
     processor = DocumentProcessor()
     documents = processor.process_documents(
-        pdf_paths=state["pdf_paths"],
-        text_paths=state["text_paths"],
-        excel_paths=state["excel_paths"]
-    )
+            pdf_paths=state["pdf_paths"],
+            text_paths=state["text_paths"],
+            excel_paths=state["excel_paths"]
+            )
     return {"documents": documents}
 
 def extract_information(state):
     """Extract key information from the documents"""
     extractor = InformationExtractor()
 
-    # Extract legacy information
-    company_info = extractor.extract_company_info(state["documents"])
-    vessel_info = extractor.extract_vessel_info(state["documents"])
-    insurance_offer = extractor.extract_insurance_offer(state["documents"])
+    # Extract data using consolidated extraction methods
+    entity_data = extractor.extract_entity_data(state["documents"])
+    financial_data = extractor.extract_financial_data(state["documents"])
+    insurance_risk_data = extractor.extract_insurance_risk_data(state["documents"])
 
-    # Extract new information
-    agreement_info = extractor.extract_agreement_info(state["documents"])
-    premium_info = extractor.extract_premium_info(state["documents"])
-    accounting_info = extractor.extract_accounting_info(state["documents"])
-    loss_ratio_info = extractor.extract_loss_ratio_info(state["documents"])
-    risk_info = extractor.extract_risk_info(state["documents"])
-    reinsurance_info = extractor.extract_reinsurance_info(state["documents"])
-    contact_info = extractor.extract_contact_info(state["documents"])
-    objects_info = extractor.extract_objects(state["documents"])
+    print("Entity Data:", entity_data.model_dump())
+    print("Financial Data:", financial_data.model_dump())
+    print("Insurance Risk Data:", insurance_risk_data.model_dump())
 
+    # Return all extracted data
     return {
-        # Legacy information
-        "company_info": company_info,
-        "vessel_info": vessel_info,
-        "insurance_offer": insurance_offer,
-
-        # New information
-        "agreement_info": agreement_info,
-        "premium_info": premium_info,
-        "accounting_info": accounting_info,
-        "loss_ratio_info": loss_ratio_info,
-        "risk_info": risk_info,
-        "reinsurance_info": reinsurance_info,
-        "contact_info": contact_info,
-        "objects_info": objects_info
-    }
+            "entity_data": entity_data,
+            "financial_data": financial_data,
+            "insurance_risk_data": insurance_risk_data
+            }
 
 def lookup_history(state):
     """Look up vessel and company history"""
     vessel_tool = VesselHistoryTool()
     company_tool = CompanyHistoryTool()
 
-    # Handle CompanyInfo object directly
-    company_info = state["company_info"][0]
-    company_name = company_info.company_name if hasattr(company_info, "company_name") else company_info["company_name"]
+    # Handle CompanyInfo from entity_data
+    company_info = state["entity_data"].company_info
+    company_name = company_info.company_name if company_info else "Unknown Company"
     company_history = company_tool.run(company_name)
 
+    # Handle vessel info from entity_data
     vessel_histories = {}
-    for vessel in state["vessel_info"]:
-        # Handle VesselInfo object directly
-        imo = vessel.imo_number if hasattr(vessel, "imo_number") else vessel["imo_number"]
-        vessel_histories[imo] = vessel_tool.run(imo)
-
-    # Look up mock data for the new structure
-    agreement_data = AGREEMENT_DATA.get(company_name, AGREEMENT_DATA.get("Bergen Shipping Company", {}))
-    premium_data = PREMIUM_DATA.get(company_name, PREMIUM_DATA.get("Bergen Shipping Company", {}))
-    accounting_data = ACCOUNTING_DATA.get(company_name, ACCOUNTING_DATA.get("Bergen Shipping Company", {}))
-    loss_ratio_data = LOSS_RATIO_DATA.get(company_name, LOSS_RATIO_DATA.get("Bergen Shipping Company", {}))
-    risk_data = RISK_DATA.get(company_name, RISK_DATA.get("Bergen Shipping Company", {}))
-    reinsurance_data = REINSURANCE_DATA.get(company_name, REINSURANCE_DATA.get("Bergen Shipping Company", {}))
-    objects_data = OBJECTS_DATA.get(company_name, OBJECTS_DATA.get("Bergen Shipping Company", []))
-    contacts_data = CONTACTS_DATA.get(company_name, CONTACTS_DATA.get("Bergen Shipping Company", []))
+    if state["entity_data"].vessel_info:
+        for vessel in state["entity_data"].vessel_info:
+            vessel_histories[vessel.imo_number] = vessel_tool.run(vessel.imo_number)
 
     return {
-        # Legacy data
-        "company_history": company_history,
-        "vessel_histories": vessel_histories,
-
-        # New data
-        "agreement_data": agreement_data,
-        "premium_data": premium_data,
-        "accounting_data": accounting_data,
-        "loss_ratio_data": loss_ratio_data,
-        "risk_data": risk_data,
-        "reinsurance_data": reinsurance_data,
-        "objects_data": objects_data,
-        "contacts_data": contacts_data
-    }
+            "company_history": company_history,
+            "vessel_histories": vessel_histories,
+            }
 
 def assess_risk(state):
     """Generate risk assessment"""
     assessor = RiskAssessor()
 
-    # For simplicity, we'll just use the first vessel if multiple are found
-    vessel_info = state["vessel_info"][0] if state["vessel_info"] else {}
+    vessel_info = {}
     vessel_history = {}
 
-    # Handle both object attributes and dictionary access
-    if vessel_info:
-        imo = vessel_info.imo_number if hasattr(vessel_info, "imo_number") else vessel_info.get("imo_number")
-        if imo:
-            vessel_history = state["vessel_histories"].get(imo, {})
+    # Get vessel info from entity_data
+    if state["entity_data"].vessel_info and len(state["entity_data"].vessel_info) > 0:
+        vessel_info = { state["entity_data"].vessel_info[i].imo_number: state["entity_data"].vessel_info[i].model_dump() for i in range(len(state["entity_data"].vessel_info))}
+        vessel_history = { imo_number: state["vessel_histories"].get(imo_number, {}) for imo_number in vessel_info }
 
-    # Convert Pydantic models to dictionaries if needed
-    company_info = state["company_info"][0] if state["company_info"] else {}
-    if hasattr(company_info, "model_dump"):
-        company_info = company_info.model_dump()
-    elif hasattr(company_info, "dict"):
-        company_info = company_info.dict()
+    # Get company info and convert to dict if needed
+    company_info = {}
+    if state["entity_data"].company_info:
+        company_info = state["entity_data"].company_info.model_dump()
 
-    vessel_info_dict = vessel_info
-    if hasattr(vessel_info, "model_dump"):
-        vessel_info_dict = vessel_info.model_dump()
-    elif hasattr(vessel_info, "dict"):
-        vessel_info_dict = vessel_info.dict()
-
-    insurance_offer = state["insurance_offer"][0] if state["insurance_offer"] else {}
-    if hasattr(insurance_offer, "model_dump"):
-        insurance_offer = insurance_offer.model_dump()
-    elif hasattr(insurance_offer, "dict"):
-        insurance_offer = insurance_offer.dict()
+    # Get insurance offer info and convert to dict if needed
+    insurance_offer = {}
+    if state["insurance_risk_data"].insurance_offer:
+        insurance_offer = state["insurance_risk_data"].insurance_offer.model_dump()
 
     # Generate assessment using the RiskAssessment from risk_assessor.py
     assessor_result = assessor.generate_assessment(
-        company_info=company_info,
-        vessel_info=vessel_info_dict,
-        insurance_offer=insurance_offer,
-        company_history=state["company_history"],
-        vessel_history=vessel_history
-    )
+            company_info=company_info,
+            vessel_info=vessel_info,
+            insurance_offer=insurance_offer,
+            company_history=state["company_history"],
+            vessel_history=vessel_history
+            )
 
     return {"assessment": assessor_result}
 
-def generate_additional_insights(state):
+class AdditionalInsights(BaseModel):
+    request_summary: str
+    recommendation: str
+    points_of_attention: List[str]
+
+def generate_additional_insights(state) -> AdditionalInsights:
     """Generate additional insights for the database entry"""
     llm = ChatOpenAI(model="gpt-4.1")
 
     # Extract relevant information
-    company_info = state["company_info"][0] if state["company_info"] else {}
-    vessel_info = state["vessel_info"][0] if state["vessel_info"] else {}
-    insurance_offer = state["insurance_offer"][0] if state["insurance_offer"] else {}
-    assessment = state["assessment"]
+    company_info = state["entity_data"].company_info
+
+    vessel_info = None
+    if state["entity_data"].vessel_info and len(state["entity_data"].vessel_info) > 0:
+        vessel_info = state["entity_data"].vessel_info[0]
+
+    insurance_offer = state["insurance_risk_data"].insurance_offer
+    assessment = state.get("assessment", {})
     agreement_data = state.get("agreement_data", {})
     premium_data = state.get("premium_data", {})
     risk_data = state.get("risk_data", {})
@@ -219,136 +172,162 @@ def generate_additional_insights(state):
 
     # Create a chain for generating insights
     chain = (
-        {"company_info": lambda _: company_str,
-         "vessel_info": lambda _: vessel_str,
-         "insurance_offer": lambda _: insurance_str,
-         "assessment": lambda _: assessment_str,
-         "agreement": lambda _: agreement_str,
-         "premium": lambda _: premium_str,
-         "risk": lambda _: risk_str}
-        | prompt
-        | llm
-    )
+            {"company_info": lambda _: company_str,
+             "vessel_info": lambda _: vessel_str,
+             "insurance_offer": lambda _: insurance_str,
+             "assessment": lambda _: assessment_str,
+             "agreement": lambda _: agreement_str,
+             "premium": lambda _: premium_str,
+             "risk": lambda _: risk_str}
+            | prompt
+            | llm.with_structured_output(AdditionalInsights)
+            )
 
     # Generate insights
     result = chain.invoke({})
 
-    # Parse the result
-    result_text = result.content
+    if not isinstance(result, AdditionalInsights):
+        result = AdditionalInsights(**result)
 
-    # Extract request summary
-    request_summary = ""
-    if "REQUEST SUMMARY:" in result_text:
-        request_summary_section = result_text.split("REQUEST SUMMARY:")[1].split("RECOMMENDATION:")[0].strip()
-        request_summary = request_summary_section
+    return result
 
-    # Extract recommendation
-    recommendation = ""
-    if "RECOMMENDATION:" in result_text:
-        recommendation_section = result_text.split("RECOMMENDATION:")[1].split("POINTS OF ATTENTION:")[0].strip()
-        recommendation = recommendation_section
-
-    # Extract points of attention
-    points_of_attention = []
-    if "POINTS OF ATTENTION:" in result_text:
-        points_section = result_text.split("POINTS OF ATTENTION:")[1].strip()
-        for line in points_section.split("\n"):
-            if line.strip().startswith("-"):
-                point = line.strip()[1:].strip()
-                if point:
-                    points_of_attention.append(point)
-
-    return {
-        "request_summary": request_summary,
-        "recommendation": recommendation,
-        "points_of_attention": points_of_attention
-    }
 
 def create_db_entry(state):
     """Create the final database entry model"""
-    # Extract company name for reference
-    company_data = state["company_info"][0] if state["company_info"] else {}
-    company_name = company_data.company_name if hasattr(company_data, "company_name") else company_data.get("company_name", "Unknown")
 
-    # Create Validity object
-    agreement_data = state.get("agreement_data", {})
-    validity_data = agreement_data.get("validity", {})
-    validity = Validity(
-        start_date=validity_data.get("start_date", "2025-01-01"),
-        end_date=validity_data.get("end_date", "2026-01-01")
-    )
+    # Create Validity object - Use agreement_info if available
+    validity = Validity(start_date=None, end_date=None)
+    if state["insurance_risk_data"].agreement_info:
+        agreement_info = state["insurance_risk_data"].agreement_info
+        validity = Validity(
+            start_date=agreement_info.start_date,
+            end_date=agreement_info.end_date
+        )
 
-    # Create Agreement object
+    # Create Agreement object from insurance_risk_data.agreement_info
     agreement = Agreement(
-        id=agreement_data.get("id", "000000-00-R0"),
-        name=agreement_data.get("name", "Unknown Agreement"),
+        id=None,
+        name=None,
         validity=validity,
-        products=agreement_data.get("products", []),
-        our_share=agreement_data.get("our_share", "0%"),
-        installments=agreement_data.get("installments", 1),
-        conditions=agreement_data.get("conditions", "Standard")
+        products=[],
+        our_share=None,
+        installments=None,
+        conditions=None
     )
 
-    # Create Premium object
-    premium_data = state.get("premium_data", {})
+    if state["insurance_risk_data"].agreement_info:
+        agreement_info = state["insurance_risk_data"].agreement_info
+        agreement = Agreement(
+            id=agreement_info.id,
+            name=agreement_info.name,
+            validity=validity,
+            products=agreement_info.products or [],
+            our_share=agreement_info.our_share,
+            installments=agreement_info.installments,
+            conditions=agreement_info.conditions
+        )
+
+    # Create Premium object from financial_data.premium_info
     premium = Premium(
-        gross_premium=premium_data.get("gross_premium", 0),
-        brokerage_percent=premium_data.get("brokerage_percent", 0),
-        net_premium=premium_data.get("net_premium", 0)
+        gross_premium=None,
+        brokerage_percent=None,
+        net_premium=None
     )
 
-    # Create Accounting object
-    accounting_data = state.get("accounting_data", {})
+    if state["financial_data"].premium_info:
+        premium_info = state["financial_data"].premium_info
+        premium = Premium(
+            gross_premium=premium_info.gross_premium,
+            brokerage_percent=premium_info.brokerage_percent,
+            net_premium=premium_info.net_premium
+        )
+
+    # Create Accounting object from financial_data.accounting_info
     accounting = Accounting(
-        paid=accounting_data.get("paid", 0),
-        amount_due=accounting_data.get("amount_due", 0),
-        remaining=accounting_data.get("remaining", 0),
-        balance_percent=accounting_data.get("balance_percent", 0)
+        paid=None,
+        amount_due=None,
+        remaining=None,
+        balance_percent=None
     )
 
-    # Create LossRatio object
-    loss_ratio_data = state.get("loss_ratio_data", {})
+    if state["financial_data"].accounting_info:
+        accounting_info = state["financial_data"].accounting_info
+        accounting = Accounting(
+            paid=accounting_info.paid,
+            amount_due=accounting_info.amount_due,
+            remaining=accounting_info.remaining,
+            balance_percent=accounting_info.balance_percent
+        )
+
+    # Create LossRatio object from financial_data.loss_ratio_info
     loss_ratio = LossRatio(
-        value_percent=loss_ratio_data.get("value_percent", 0),
-        claims=loss_ratio_data.get("claims"),
-        premium=loss_ratio_data.get("premium")
+        value_percent=None,
+        claims=None,
+        premium=None
     )
 
-    # Create Risk object
-    risk_data = state.get("risk_data", {})
-    risk_values = risk_data.get("values_by_id", {})
+    if state["financial_data"].loss_ratio_info:
+        loss_ratio_info = state["financial_data"].loss_ratio_info
+        loss_ratio = LossRatio(
+            value_percent=loss_ratio_info.value_percent,
+            claims=loss_ratio_info.claims,
+            premium=loss_ratio_info.premium
+        )
 
-    # If risk values are not available, use the assessment
-    assessment = state.get("assessment", {})
-    if not risk_values and hasattr(assessment, "values_by_id"):
-        risk_values = assessment.values_by_id
+    # Create Risk object - First try from insurance_risk_data.risk_info
+    # If not available, use the assessment
+    risk_categories = {}
 
-    risk = Risk(
-        values_by_id=risk_values
-    )
+    if state["insurance_risk_data"].risk_info and state["insurance_risk_data"].risk_info.risk_categories:
+        risk_categories = state["insurance_risk_data"].risk_info.risk_categories
+    else:
+        # If risk values are not available, use the assessment
+        assessment = state.get("assessment", {})
+        if assessment:
+            # Check if assessment is a dictionary or an object
+            if isinstance(assessment, dict) and "risk_categories" in assessment:
+                risk_categories = assessment["risk_categories"]
+            elif hasattr(assessment, "risk_categories"):
+                risk_categories = assessment.risk_categories
 
-    # Create objects list
-    objects_data = state.get("objects_data", [])
+    risk = Risk(risk_categories=risk_categories)
 
-    # Create Reinsurance object
-    reinsurance_data = state.get("reinsurance_data", {})
+    # Create objects list - Use vessel info as objects if available
+    objects_data = []
+    if state["entity_data"].vessel_info:
+        for vessel in state["entity_data"].vessel_info:
+            objects_data.append({
+                "name": vessel.vessel_name,
+                "id": vessel.imo_number
+            })
+
+    # Create Reinsurance object from insurance_risk_data.reinsurance_info
     reinsurance = Reinsurance(
-        net_tty=reinsurance_data.get("net_tty", 0),
-        net_fac=reinsurance_data.get("net_fac"),
-        net_retention=reinsurance_data.get("net_retention", 0),
-        commission=reinsurance_data.get("commission")
+        net_tty=None,
+        net_fac=None,
+        net_retention=None,
+        commission=None
     )
 
-    # Create Contact objects
-    contacts_data = state.get("contacts_data", [])
+    if state["insurance_risk_data"].reinsurance_info:
+        reinsurance_info = state["insurance_risk_data"].reinsurance_info
+        reinsurance = Reinsurance(
+            net_tty=reinsurance_info.net_tty,
+            net_fac=reinsurance_info.net_fac,
+            net_retention=reinsurance_info.net_retention,
+            commission=reinsurance_info.commission
+        )
+
+    # Create Contact objects from entity_data.contact_info
     contacts = []
-    for contact_data in contacts_data:
-        contacts.append(Contact(
-            name=contact_data.get("name", "Unknown"),
-            role=contact_data.get("role", "Unknown"),
-            email=contact_data.get("email", "unknown@example.com"),
-            phone=contact_data.get("phone", "Unknown")
-        ))
+    if state["entity_data"].contact_info:
+        for contact_info in state["entity_data"].contact_info:
+            contacts.append(Contact(
+                name=contact_info.name,
+                role=contact_info.role,
+                email=contact_info.email,
+                phone=contact_info.phone
+            ))
 
     # Generate additional insights
     insights = generate_additional_insights(state)
@@ -363,9 +342,9 @@ def create_db_entry(state):
         objects=objects_data,
         reinsurance=reinsurance,
         contacts=contacts,
-        request_summary=insights.get("request_summary", ""),
-        recommendation=insights.get("recommendation", ""),
-        points_of_attention=insights.get("points_of_attention", [])
+        request_summary=insights.request_summary,
+        recommendation=insights.recommendation,
+        points_of_attention=insights.points_of_attention,
     )
 
     return {"db_entry": db_entry}
@@ -376,28 +355,12 @@ class WorkflowState(TypedDict, total=False):
     text_paths: List[str]
     excel_paths: List[str]
     documents: List
-    company_info: List[Dict]
-    vessel_info: List[Dict]
-    insurance_offer: List[Dict]
-    agreement_info: List[Dict]
-    premium_info: List[Dict]
-    accounting_info: List[Dict]
-    loss_ratio_info: List[Dict]
-    risk_info: List[Dict]
-    reinsurance_info: List[Dict]
-    contact_info: List[Dict]
-    objects_info: List[Dict]
+    entity_data: Any
+    financial_data: Any
+    insurance_risk_data: Any
     company_history: Dict
     vessel_histories: Dict
-    agreement_data: Dict
-    premium_data: Dict
-    accounting_data: Dict
-    loss_ratio_data: Dict
-    risk_data: Dict
-    reinsurance_data: Dict
-    objects_data: List
-    contacts_data: List
-    assessment: Dict
+    assessment: Any
     db_entry: Any
 
 def create_workflow():
@@ -430,19 +393,19 @@ def main():
 
     # Define input paths with absolute paths from project root
     inputs = {
-        "pdf_paths": [
-            "src/data/prepared/GB_Shipping_Presentation.pdf",
-            "src/data/prepared/GB_Shipping_Maritime_Reinsurance_Contract.pdf",
-        ],
-        "excel_paths": [
-            "src/data/prepared/GB_Shipping_Fleet_Schedule.xlsx",
-            "src/data/prepared/GB_Shipping_HM_Loss_Record.xlsx",
-            "src/data/prepared/GB_Shipping_LOH_Loss_Record.xlsx",
-        ],
-        "text_paths": [
-            "src/data/prepared/email.txt"
-        ]
-    }
+            "pdf_paths": [
+                "src/data/prepared/GB_Shipping_Presentation.pdf",
+                "src/data/prepared/GB_Shipping_Maritime_Reinsurance_Contract.pdf",
+                ],
+            "excel_paths": [
+                "src/data/prepared/GB_Shipping_Fleet_Schedule.xlsx",
+                "src/data/prepared/GB_Shipping_HM_Loss_Record.xlsx",
+                "src/data/prepared/GB_Shipping_LOH_Loss_Record.xlsx",
+                ],
+            "text_paths": [
+                "src/data/prepared/email.txt"
+                ]
+            }
 
     # Execute the workflow
     result = workflow.invoke(inputs)

@@ -1,104 +1,66 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any, Union
-
-# Legacy models - kept for backward compatibility
-class Vessel(BaseModel):
-    name: str
-    imo_number: str
-    
-class Company(BaseModel):
-    name: str
-    company_id: Optional[str] = None
-    vessels: List[Vessel] = []
-    
-class Incident(BaseModel):
-    date: str
-    description: str
-    severity: str
-    
-class Claim(BaseModel):
-    date: str
-    amount: float
-    status: str
-    description: str
-    
-class History(BaseModel):
-    incidents: List[Incident] = []
-    claims: List[Claim] = []
-    
-class InsuranceDetails(BaseModel):
-    coverage_percentage: float
-    premium_amount: Optional[float] = None
-    coverage_type: str
-    
-class RiskAssessment(BaseModel):
-    risk_score: int = Field(ge=1, le=10)
-    company_description: str
-    case_description: str
-    recommendation: str
-
-# Legacy DatabaseEntry - kept for backward compatibility
-class LegacyDatabaseEntry(BaseModel):
-    """Legacy model for database entry"""
-    company: Company
-    vessels: List[Vessel]
-    insurance: InsuranceDetails
-    company_history: History
-    vessel_histories: Dict[str, History]  # IMO number -> History
-    assessment: RiskAssessment
+from typing import List, Optional, Dict
 
 # New models for the updated structure
 class Validity(BaseModel):
     """Validity period for an agreement"""
-    start_date: str = ""
-    end_date: str = ""
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 class Agreement(BaseModel):
     """Insurance agreement details"""
-    id: str = ""
-    name: str = ""
+    id: Optional[str] = None
+    name: Optional[str] = None
     validity: Validity = Field(default_factory=Validity)
     products: List[str] = []
-    our_share: str = "0%"
-    installments: int = 1
-    conditions: str = ""
+    our_share: Optional[str] = None
+    installments: Optional[int] = None
+    conditions: Optional[str] = None
 
 class Premium(BaseModel):
     """Premium information"""
-    gross_premium: int = 0
-    brokerage_percent: int = 0
-    net_premium: int = 0
+    gross_premium: Optional[float] = None
+    brokerage_percent: Optional[float] = None
+    net_premium: Optional[float] = None
 
 class Accounting(BaseModel):
     """Accounting information"""
-    paid: int = 0
-    amount_due: int = 0
-    remaining: int = 0
-    balance_percent: int = 0
+    paid: Optional[float] = None
+    amount_due: Optional[float] = None
+    remaining: Optional[float] = None
+    balance_percent: Optional[float] = None
 
 class LossRatio(BaseModel):
     """Loss ratio information"""
-    value_percent: int = 0
+    value_percent: Optional[float] = None
     claims: Optional[float] = None
     premium: Optional[float] = None
 
+class RiskCategories(BaseModel):
+    technical_condition: Optional[int] = Field(description="Technical condition risk score (1-10)")
+    operational_quality: Optional[int] = Field(description="Operational quality risk score (1-10)")
+    crew_quality: Optional[int] = Field(description="Crew quality risk score (1-10)")
+    management_quality: Optional[int] = Field(description="Management quality risk score (1-10)")
+    claims_history: Optional[int] = Field(description="Claims history risk score (1-10)")
+    financial_stability: Optional[int] = Field(description="Financial stability risk score (1-10)")
+
 class Risk(BaseModel):
     """Risk assessment values by category ID"""
-    values_by_id: Dict[str, int] = Field(default_factory=dict)
+    risk_categories: Optional[RiskCategories] = None
 
 class Reinsurance(BaseModel):
     """Reinsurance information"""
-    net_tty: int = 0
-    net_fac: Optional[int] = None
-    net_retention: int = 0
+    net_tty: Optional[float] = None
+    net_fac: Optional[float] = None
+    net_retention: Optional[float] = None
     commission: Optional[float] = None
 
 class Contact(BaseModel):
     """Contact information"""
-    name: str = ""
-    role: str = ""
-    email: str = ""
-    phone: str = ""
+    name: Optional[str] = None
+    role: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
 
 # New DatabaseEntry
 class DatabaseEntry(BaseModel):
@@ -108,11 +70,11 @@ class DatabaseEntry(BaseModel):
     accounting: Accounting = Field(default_factory=Accounting)
     loss_ratio: LossRatio = Field(default_factory=LossRatio)
     risk: Risk = Field(default_factory=Risk)
-    objects: List[str] = []
+    objects: List[Dict] = []  # Objects associated with this entry
     reinsurance: Reinsurance = Field(default_factory=Reinsurance)
     contacts: List[Contact] = []
-    
+
     # Additional fields requested by the user
-    request_summary: str = ""  # Summary of the underwriting request
-    recommendation: str = ""   # AI recommendation regarding the case
+    request_summary: Optional[str] = None  # Summary of the underwriting request
+    recommendation: Optional[str] = None   # AI recommendation regarding the case
     points_of_attention: List[str] = []  # Points to pay attention to when reviewing

@@ -2,7 +2,9 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
+from typing import Dict, Optional
+
+from src.models import RiskCategories
 
 class RiskAssessment(BaseModel):
     risk_score: int = Field(description="Overall risk score from 1-10, where 10 is highest risk")
@@ -10,7 +12,7 @@ class RiskAssessment(BaseModel):
     case_description: str = Field(description="Summary of the insurance case")
     recommendation: str = Field(description="Recommendation on whether to accept the insurance offer")
     loss_ratio_percent: Optional[int] = Field(None, description="Loss ratio percentage")
-    values_by_id: Optional[Dict[str, int]] = Field(default_factory=dict, description="Risk values by category ID")
+    risk_by_category: Optional[RiskCategories] = Field(None, description="Risk values for specific categories")
 
 class RiskAssessor:
     def __init__(self, model_name="gpt-4.1"):
@@ -41,13 +43,13 @@ class RiskAssessor:
         - case_description: Summary of the insurance case (2-3 sentences)
         - recommendation: Your recommendation (Accept/Reject/Request More Information)
         - loss_ratio_percent: Loss Ratio Percentage (0-100)
-        - values_by_id: Risk values for specific categories as a dictionary with these keys:
-          "04": Technical condition (1-10)
-          "08": Operational quality (1-10)
-          "12": Crew quality (1-10)
-          "14": Management quality (1-10)
-          "16": Claims history (1-10)
-          "18": Financial stability (1-10)
+        - risk_by_category: Risk values for specific categories as a dictionary with these keys:
+              "technical_condition": Technical condition risk score (1-10)
+              "operational_quality": Operational quality risk score (1-10)
+              "crew_quality": Crew quality risk score (1-10)
+              "management_quality": Management quality risk score (1-10)
+              "claims_history": Claims history risk score (1-10)
+              "financial_stability": Financial stability risk score (1-10)
 
         All fields are required, do not omit any fields in your response.
         """)

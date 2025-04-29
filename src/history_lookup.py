@@ -1,5 +1,4 @@
 from langchain.tools import BaseTool
-from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 # Import mock data for demonstration
@@ -26,7 +25,7 @@ class VesselHistoryTool(BaseTool):
     name: str = "vessel_history_lookup"
     description: str = "Look up incident history and claims for a vessel by IMO number"
     args_schema: type = VesselHistoryInput
-    
+
     def _run(self, imo_number: str):
         """Look up vessel history from mock data"""
         if imo_number in VESSEL_HISTORY:
@@ -37,7 +36,7 @@ class CompanyHistoryTool(BaseTool):
     name: str = "company_history_lookup"
     description: str = "Look up history and claims for a shipping company"
     args_schema: type = CompanyHistoryInput
-    
+
     def _run(self, company_name: str):
         """Look up company history from mock data"""
         # Try case-insensitive match

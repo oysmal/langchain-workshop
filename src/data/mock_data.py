@@ -25,6 +25,41 @@ VESSEL_HISTORY = {
             {"date": "2021-07-15", "amount": 150000, "status": "Paid", "description": "Security upgrades after piracy attempt"},
             {"date": "2019-04-05", "amount": 50000, "status": "Paid", "description": "Navigation equipment replacement"}
         ]
+    },
+    # GB Shipping Vessels from Excel files
+    "9700001": {  # GB Pathfinder
+        "incidents": [
+            {"date": "2020-08-05", "description": "North Sea main-engine damage", "severity": "High"}
+        ],
+        "claims": [
+            {"date": "2020-08-05", "amount": 5500000, "status": "Paid", "description": "North Sea main-engine damage repairs"}
+        ]
+    },
+    "9700002": {  # GB Horizon
+        "incidents": [
+            {"date": "2020-12-12", "description": "Grounding at River Humber", "severity": "Medium"}
+        ],
+        "claims": [
+            {"date": "2020-12-12", "amount": 4700000, "status": "Paid", "description": "Grounding at River Humber repairs"},
+            {"date": "2020-12-12", "amount": 380000, "status": "Paid", "description": "Loss of hire due to grounding"}
+        ]
+    },
+    "9700003": {  # GB Explorer
+        "incidents": [
+            {"date": "2021-04-11", "description": "Cargo-hold flooding", "severity": "Medium"}
+        ],
+        "claims": [
+            {"date": "2021-04-11", "amount": 3300000, "status": "Pending", "description": "Cargo-hold flooding repairs"},
+            {"date": "2021-04-11", "amount": 575000, "status": "Pending", "description": "Loss of hire due to cargo-hold flooding"}
+        ]
+    },
+    "9700004": {  # GB Atlas
+        "incidents": [
+            {"date": "2021-02-18", "description": "Crane failure at Immingham", "severity": "Medium"}
+        ],
+        "claims": [
+            {"date": "2021-02-18", "amount": 2500000, "status": "Paid", "description": "Crane failure repairs"}
+        ]
     }
 }
 
@@ -54,6 +89,22 @@ COMPANY_HISTORY = {
             {"date": "2022-12-10", "amount": 200000, "status": "Paid", "description": "Compensation for damaged cargo"},
             {"date": "2022-02-20", "amount": 30000, "status": "Paid", "description": "Penalty for delay"},
             {"date": "2020-07-05", "amount": 750000, "status": "Paid", "description": "Repairs and liability for collision"}
+        ]
+    },
+    "GB Shipping": {
+        "incidents": [
+            {"date": "2020-08-05", "description": "Vessel Pathfinder main-engine damage", "severity": "High"},
+            {"date": "2020-12-12", "description": "Vessel Horizon grounding at River Humber", "severity": "Medium"},
+            {"date": "2021-02-18", "description": "Vessel Atlas crane failure", "severity": "Medium"},
+            {"date": "2021-04-11", "description": "Vessel Explorer cargo-hold flooding", "severity": "Medium"}
+        ],
+        "claims": [
+            {"date": "2020-08-05", "amount": 5500000, "status": "Paid", "description": "Vessel Pathfinder repairs"},
+            {"date": "2020-12-12", "amount": 4700000, "status": "Paid", "description": "Vessel Horizon repairs"},
+            {"date": "2020-12-12", "amount": 380000, "status": "Paid", "description": "Vessel Horizon loss of hire"},
+            {"date": "2021-02-18", "amount": 2500000, "status": "Paid", "description": "Vessel Atlas repairs"},
+            {"date": "2021-04-11", "amount": 3300000, "status": "Pending", "description": "Vessel Explorer repairs"},
+            {"date": "2021-04-11", "amount": 575000, "status": "Pending", "description": "Vessel Explorer loss of hire"}
         ]
     }
 }
@@ -95,6 +146,18 @@ AGREEMENT_DATA = {
         "our_share": "50%",
         "installments": 3,
         "conditions": "Nordic Plan"
+    },
+    "GB Shipping": {
+        "id": "231457-04-R4",
+        "name": "Container Feeder Fleet",
+        "validity": {
+            "start_date": "2025-05-01",
+            "end_date": "2026-05-01"
+        },
+        "products": ["H&M", "HULL INT", "LOH", "WAR", "WAR TLO"],
+        "our_share": "85%",
+        "installments": 4,
+        "conditions": "Nordic Plan"
     }
 }
 
@@ -114,6 +177,11 @@ PREMIUM_DATA = {
         "gross_premium": 2100000,
         "brokerage_percent": 18,
         "net_premium": 1722000
+    },
+    "GB Shipping": {
+        "gross_premium": 2500000,
+        "brokerage_percent": 14,
+        "net_premium": 2150000
     }
 }
 
@@ -136,6 +204,12 @@ ACCOUNTING_DATA = {
         "amount_due": 300000,
         "remaining": 600000,
         "balance_percent": 57
+    },
+    "GB Shipping": {
+        "paid": 1875000,
+        "amount_due": 375000,
+        "remaining": 250000,
+        "balance_percent": 75
     }
 }
 
@@ -155,6 +229,11 @@ LOSS_RATIO_DATA = {
         "value_percent": 57,
         "claims": 980000,
         "premium": 1722000
+    },
+    "GB Shipping": {
+        "value_percent": 79,
+        "claims": 16955000,
+        "premium": 2150000
     }
 }
 
@@ -189,6 +268,16 @@ RISK_DATA = {
             "16": 8,
             "18": 5
         }
+    },
+    "GB Shipping": {
+        "values_by_id": {
+            "04": 5,  # Technical condition
+            "08": 4,  # Operational quality
+            "12": 5,  # Crew quality
+            "14": 6,  # Management quality
+            "16": 7,  # Claims history
+            "18": 5   # Financial stability
+        }
     }
 }
 
@@ -211,6 +300,12 @@ REINSURANCE_DATA = {
         "net_fac": 86100,
         "net_retention": 1614900,
         "commission": 4.2
+    },
+    "GB Shipping": {
+        "net_tty": 25000,
+        "net_fac": 107500,
+        "net_retention": 2017500,
+        "commission": 5.0
     }
 }
 
@@ -230,6 +325,18 @@ OBJECTS_DATA = {
         "Bulk Carrier I",
         "Bulk Carrier II",
         "Container Ship Alpha"
+    ],
+    "GB Shipping": [
+        "GB Pathfinder",
+        "GB Horizon",
+        "GB Explorer",
+        "GB Atlas",
+        "GB Vanguard",
+        "GB Venturer",
+        "GB Seaway",
+        "GB Meridian",
+        "GB Conquest",
+        "GB Endeavour"
     ]
 }
 
@@ -281,6 +388,26 @@ CONTACTS_DATA = {
             "role": "Risk Assessor",
             "email": "jennifer.davis@norclub.com",
             "phone": "+47 998 67 890"
+        }
+    ],
+    "GB Shipping": [
+        {
+            "name": "Thomas Grant",
+            "role": "Claims Handler",
+            "email": "thomas.grant@norclub.com",
+            "phone": "+47 998 78 901"
+        },
+        {
+            "name": "Alexandra Chen",
+            "role": "Account Manager",
+            "email": "alexandra.chen@norclub.com",
+            "phone": "+47 998 89 012"
+        },
+        {
+            "name": "Richard Peterson",
+            "role": "Risk Assessor",
+            "email": "richard.peterson@norclub.com",
+            "phone": "+47 998 90 123"
         }
     ]
 }
