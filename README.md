@@ -35,9 +35,9 @@ manager, which is very cool!)
    - (a). see [this official link](https://www.jetify.com/docs/devbox/installing_devbox)
    - (b). or, if you're on Mac or Linux just run this command:
 
-   ```bash
-   curl -fsSL https://get.jetify.com/devbox | bash
-   ```
+     ```bash
+     curl -fsSL https://get.jetify.com/devbox | bash
+     ```
 
 2. Clone this repository
 
@@ -51,19 +51,23 @@ manager, which is very cool!)
 
    2. edit the new `.env.local` file and put your API key in the `OPENAI_API_KEY` variable
 
-4. Start the devbox shell by running the command `devbox shell` (this might take a minute to install everything)
+4. Start the devbox shell by running the command (this might take a minute to install everything)
+
+   ```bash
+   devbox shell
+   ```
 
 5. Now inside the devbox shell, install python dependencies with the following command:
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 6. Test it out by running the following command:
 
-```python
-python -m src.main
-```
+   ```python
+   python -m src.main
+   ```
 
 ## Running the Application
 
