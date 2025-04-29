@@ -1,0 +1,72 @@
+Subject: Risk Assessment & Quote Request – GB Shipping plc (Hull & Loss-of-Hire)
+
+Dear Ian Surer,
+
+I hope you are well. Thank you for your ongoing dialogue regarding North-Sea tonnage; please accept my apologies for the brief delay in forwarding the full submission.
+
+⸻
+
+Risk Summary
+
+Company overview
+GB Shipping plc was founded in 2002 in London to provide short-sea and offshore support services. Today it owns and operates 40 vessels (about 1.2 million DWT) and is the second-largest privately held UK-flag fleet. Long-term charters with blue-chip energy majors and liner companies underpin its earnings.
+
+Fleet details
+• 15 container feeders – average age 7.4 years – trading North-West Europe
+• 10 Handy/Supramax bulk carriers – average age 9.1 years – Atlantic and Baltic routes
+• 8 product tankers – average age 8.6 years – UK-Continent and Mediterranean clean-product trades
+• 4 subsea/ROV support vessels – average age 6.2 years – North-Sea oil, gas and wind projects
+• 3 LNG-electric hybrid MPSVs – average age 2.1 years – offshore wind and decommissioning work
+
+Growth strategy
+Five additional hybrid MPSVs are on order for delivery 2026–2027, targeting the 19 GW UK offshore-wind build-out and the decommissioning of 470 legacy North-Sea platforms.
+
+⸻
+
+Risk Mitigation & Technology Investment
+
+GB Shipping has invested more than £24 million since 2021 in predictive analytics and safety technology, driving lower incident frequency.
+
+• Digital-twin telemetry and vibration monitoring – real-time shaft-line, bearing and main-engine data are streamed ashore; algorithms flag anomalies above twice baseline RMS. In January 2024 the system on MV GB Pathfinder detected rising thrust-bearing vibration 72 hours before failure, allowing proactive maintenance that avoided a £650 k Hull claim and five days’ off-hire.
+
+• AI-powered PPE and man-over-board video analytics – 180 IP cameras and AI models verify helmet, harness and life-vest compliance while triggering bridge alarms if a person falls overboard. Near-miss safety breaches fell 35 percent year-on-year and the company posted zero lost-time injuries in 2023.
+
+• Hybrid propulsion and smart weather-routing – the three LNG-electric MPSVs cut fuel consumption 25 percent and CO₂ emissions 19 kt per year, while routing software steers bulkers clear of heavy-weather risk, reducing damage claims.
+
+⸻
+
+Insurance Coverage Request
+
+Current programme (all policies expire 30 June 2025):
+• Hull & Machinery – USD 500 million limit
+• Increased Value – USD 150 million limit
+• War Risks – USD 500 million limit
+• Freight Interest – USD 20 million limit
+• Loss of Hire – 90 days at USD 35 000 per day
+
+Request for quotation:
+For the forthcoming renewal we seek separate terms for Hull & Machinery (all vessels, same limit) and Loss of Hire (90-day period, with an option for 120 days). Increased Value, War and Freight Interest will remain with existing markets this year.
+
+Relevant documentation—quote slip, fleet schedule, five-year loss record (split H&M and LOH) and the 2024 company presentation—is attached.
+
+⸻
+
+Timeline & Next Steps
+
+Our board will review offers on 25 May 2025. To allow internal evaluation and market support, we would appreciate receiving your terms by 17 May 2025.
+
+Please advise if any additional technical data, survey reports or CO₂-intensity trajectories are required. Thank you in advance for your consideration.
+
+Kind regards,
+
+James Hartley
+Insurance & Risk Manager
+GB Shipping plc
++44 20 7450 8800
+j.hartley@gb-shipping.co.uk
+
+Attachments:
+	1.	Quote Slip – GB Shipping plc 2025/26 (H&M & LOH)
+	2.	Fleet Schedule (rev. Apr-2025) – target premium included
+	3.	Loss Record 2020–2024 YTD – H&M vs. LOH
+	4.	GB Shipping Presentation (Apr 2025)

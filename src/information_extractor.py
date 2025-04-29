@@ -9,11 +9,11 @@ from typing import List, Optional, Dict
 class CompanyInfo(BaseModel):
     company_name: str = Field(description="The name of the shipping company")
     company_id: Optional[str] = Field(description="Company identifier if available")
-    
+
 class VesselInfo(BaseModel):
     vessel_name: str = Field(description="The name of the vessel")
     imo_number: str = Field(description="The IMO number of the vessel")
-    
+
 class InsuranceOffer(BaseModel):
     coverage_percentage: float = Field(description="Percentage of total insurance being offered")
     premium_amount: Optional[float] = Field(description="The premium amount if specified")
@@ -31,33 +31,34 @@ class AgreementInfo(BaseModel):
     conditions: Optional[str] = Field(description="Agreement conditions")
 
 class PremiumInfo(BaseModel):
-    gross_premium: Optional[int] = Field(description="Gross premium amount")
-    brokerage_percent: Optional[int] = Field(description="Brokerage percentage")
-    net_premium: Optional[int] = Field(description="Net premium amount")
+    gross_premium: Optional[float] = Field(description="Gross premium amount")
+    brokerage_percent: Optional[float] = Field(description="Brokerage percentage")
+    net_premium: Optional[float] = Field(description="Net premium amount")
 
 class AccountingInfo(BaseModel):
-    paid: Optional[int] = Field(description="Amount paid")
-    amount_due: Optional[int] = Field(description="Amount due")
-    remaining: Optional[int] = Field(description="Remaining amount")
-    balance_percent: Optional[int] = Field(description="Balance percentage")
+    paid: Optional[float] = Field(description="Amount paid")
+    amount_due: Optional[float] = Field(description="Amount due")
+    remaining: Optional[float] = Field(description="Remaining amount")
+    balance_percent: Optional[float] = Field(description="Balance percentage")
 
 class LossRatioInfo(BaseModel):
-    value_percent: Optional[int] = Field(description="Loss ratio percentage value")
+    value_percent: Optional[float] = Field(description="Loss ratio percentage value")
     claims: Optional[float] = Field(description="Claims amount")
     premium: Optional[float] = Field(description="Premium amount")
 
 class RiskInfo(BaseModel):
-    technical_condition: Optional[int] = Field(description="Technical condition risk score (1-10)", ge=1, le=10)
-    operational_quality: Optional[int] = Field(description="Operational quality risk score (1-10)", ge=1, le=10)
-    crew_quality: Optional[int] = Field(description="Crew quality risk score (1-10)", ge=1, le=10)
-    management_quality: Optional[int] = Field(description="Management quality risk score (1-10)", ge=1, le=10)
-    claims_history: Optional[int] = Field(description="Claims history risk score (1-10)", ge=1, le=10)
-    financial_stability: Optional[int] = Field(description="Financial stability risk score (1-10)", ge=1, le=10)
+    technical_condition: Optional[int] = Field(description="Technical condition risk score (1-10)")
+    operational_quality: Optional[int] = Field(description="Operational quality risk score (1-10)")
+    crew_quality: Optional[int] = Field(description="Crew quality risk score (1-10)")
+    management_quality: Optional[int] = Field(description="Management quality risk score (1-10)")
+    claims_history: Optional[int] = Field(description="Claims history risk score (1-10)")
+    financial_stability: Optional[int] = Field(description="Financial stability risk score (1-10)")
+    values_by_id: Optional[Dict[str, int]] = Field(description="Risk values indexed by ID")
 
 class ReinsuranceInfo(BaseModel):
-    net_tty: Optional[int] = Field(description="Net TTY amount")
-    net_fac: Optional[int] = Field(description="Net FAC amount")
-    net_retention: Optional[int] = Field(description="Net retention amount")
+    net_tty: Optional[float] = Field(description="Net TTY amount")
+    net_fac: Optional[float] = Field(description="Net FAC amount")
+    net_retention: Optional[float] = Field(description="Net retention amount")
     commission: Optional[float] = Field(description="Commission percentage")
 
 class ContactInfo(BaseModel):
@@ -72,27 +73,27 @@ class ObjectInfo(BaseModel):
 class InformationExtractor:
     def __init__(self, model_name="gpt-4.1"):
         self.llm = ChatOpenAI(model=model_name)
-    
+
     def _create_extraction_chain(self, schema_class):
         """Create an extraction chain for the given schema class"""
         # Define the extraction prompt
         prompt = ChatPromptTemplate.from_template(
-            """Extract the following information from the text below:
-            
+            """Extract the following information from the text below. The text may include content from PDF documents,
+            text files, and Excel spreadsheets, so please process all formats to find the requested information.
+
             {format_instructions}
-            
+
             Text: {input}"""
         )
-        
-        # Create the extraction chain
+
         chain = (
             {"input": RunnablePassthrough(), "format_instructions": lambda _: f"Extract information about {schema_class.__name__}"}
             | prompt
             | self.llm.with_structured_output(schema_class)
         )
-        
+
         return chain
-    
+
     def extract_company_info(self, documents):
         """Extract company information from documents"""
         extraction_chain = self._create_extraction_chain(CompanyInfo)
@@ -100,19 +101,19 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         # Return as list to maintain compatibility with the rest of the code
         return [results]
-    
+
     def extract_vessel_info(self, documents):
         """Extract vessel information including IMO numbers"""
         extraction_chain = self._create_extraction_chain(VesselInfo)
         text_content = "\n\n".join([doc.page_content for doc in documents])
-        
+
         # For vessel info, we might have multiple vessels, so we'll use a different approach
         # First, extract a single vessel to see if it works
         result = extraction_chain.invoke(text_content)
-        
+
         # Return as list to maintain compatibility with the rest of the code
         return [result]
-    
+
     def extract_insurance_offer(self, documents):
         """Extract insurance offer details"""
         extraction_chain = self._create_extraction_chain(InsuranceOffer)
@@ -120,7 +121,7 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         # Return as list to maintain compatibility with the rest of the code
         return [results]
-    
+
     def extract_agreement_info(self, documents):
         """Extract agreement information from documents"""
         extraction_chain = self._create_extraction_chain(AgreementInfo)
@@ -128,7 +129,7 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         # Return as list to maintain compatibility with the rest of the code
         return [results]
-    
+
     def extract_premium_info(self, documents):
         """Extract premium information from documents"""
         extraction_chain = self._create_extraction_chain(PremiumInfo)
@@ -136,7 +137,7 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         # Return as list to maintain compatibility with the rest of the code
         return [results]
-    
+
     def extract_accounting_info(self, documents):
         """Extract accounting information from documents"""
         extraction_chain = self._create_extraction_chain(AccountingInfo)
@@ -144,7 +145,7 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         # Return as list to maintain compatibility with the rest of the code
         return [results]
-    
+
     def extract_loss_ratio_info(self, documents):
         """Extract loss ratio information from documents"""
         extraction_chain = self._create_extraction_chain(LossRatioInfo)
@@ -152,7 +153,7 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         # Return as list to maintain compatibility with the rest of the code
         return [results]
-    
+
     def extract_risk_info(self, documents):
         """Extract risk information from documents"""
         extraction_chain = self._create_extraction_chain(RiskInfo)
@@ -160,7 +161,7 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         # Return as list to maintain compatibility with the rest of the code
         return [results]
-    
+
     def extract_reinsurance_info(self, documents):
         """Extract reinsurance information from documents"""
         extraction_chain = self._create_extraction_chain(ReinsuranceInfo)
@@ -168,7 +169,7 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         # Return as list to maintain compatibility with the rest of the code
         return [results]
-    
+
     def extract_contact_info(self, documents):
         """Extract contact information from documents"""
         extraction_chain = self._create_extraction_chain(ContactInfo)
@@ -176,15 +177,15 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         # Return as list to maintain compatibility with the rest of the code
         return [results]
-    
+
     def extract_objects(self, documents):
         """Extract object information from documents"""
         extraction_chain = self._create_extraction_chain(ObjectInfo)
         text_content = "\n\n".join([doc.page_content for doc in documents])
-        
+
         # For objects, we might have multiple entries, so we'll use a different approach
         # First, extract a single object to see if it works
         result = extraction_chain.invoke(text_content)
-        
+
         # Return as list to maintain compatibility with the rest of the code
         return [result]
