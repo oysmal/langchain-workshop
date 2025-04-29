@@ -51,7 +51,7 @@ manager, which is very cool!)
 
    2. edit the new `.env.local` file and put your API key in the `OPENAI_API_KEY` variable
 
-4. Start the devbox shell by running the command (this might take a minute to install everything)
+4. Start the devbox shell by running the following command (this might take a minute to install everything):
 
    ```bash
    devbox shell
