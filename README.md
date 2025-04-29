@@ -39,14 +39,27 @@ manager, which is very cool!)
 
 3. Prepare the API key for OpenAI:
 
-   1. run the following command in this repository: `cp .env.template .env.local`
+   1. run the following command in this repository:
+
+   ```bash
+   cp .env.template .env.local
+   ```
+
    2. edit the new `.env.local` file and put your API key in the `OPENAI_API_KEY` variable
 
 4. Start the devbox shell by running the command `devbox shell` (this might take a minute to install everything)
 
-5. Now inside the devbox shell, install python dependencies with the following command: `pip install -r requirements.txt`
+5. Now inside the devbox shell, install python dependencies with the following command:
 
-6. Test it out by running `python -m src.main`
+```bash
+pip install -r requirements.txt
+```
+
+6. Test it out by running the following command:
+
+```python
+python -m src.main
+```
 
 ## Running the Application
 
