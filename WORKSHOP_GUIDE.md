@@ -76,9 +76,13 @@ In this step, you'll create a simple LangChain application to understand the bas
 
 **Branch: `step-2`**
 
-In this step, you'll implement document processing to handle different file types.
+In this step, you'll set up your LangGraph workflow, and implement document processing to handle different file types.
 
-1. Open `src/document_processor.py` and implement the missing methods:
+1. Open `src/workflow_state.py` and add a new entry for the documents to the state class. These should be a list of Documents.
+
+2. Open `src/main.py` and complete the `create_workflow` and `process_documents` methods. You must instantiate your StateGraph using your WorkflowState class. Then, add a node for document processing to the workflow, and edges between START, your new node, and END.
+
+3. Open `src/document_processor.py` and implement the missing methods:
    ```python
    # TODO: Implement the load_pdf method
    # TODO: Implement the load_excel method
@@ -86,10 +90,6 @@ In this step, you'll implement document processing to handle different file type
    ```
 
    Hint: You need `PyPDFLoader` and `UnstructuredExcelLoader`
-
-2. Open `src/workflow_state.py` and add a new entry for the documents to the state class.
-
-3. Open `src/main.py` and add a node for document processing to the workflow.
 
 4. Print the loaded documents when the workflow has run
 
@@ -99,6 +99,7 @@ In this step, you'll implement document processing to handle different file type
    ```
 
 **Key Concepts:**
+- LangGraph for workflow management
 - Document loaders from langchain_community
 - Handling different file types (PDF, text, Excel)
 - Combining documents from multiple sources
@@ -114,11 +115,11 @@ In this step, you'll implement structured information extraction from documents.
 
 1. Open `src/information_extractor.py` and implement the extraction methods:
    ```python
-   # TODO: Implement the _create_extraction_chain method
    # TODO: Implement the extract_entity_data method
    # TODO: Implement the extract_financial_data method
    # TODO: Implement the extract_insurance_risk_data method
    ```
+You will have to use `ChatPromptTemplate` to create a prompt template, and combine this with appropriate structured output entities for parsing.
 
 2. Update `src/main.py` and `src/workflow_state.py` to add a node for information extraction:
    ```python
@@ -131,7 +132,6 @@ In this step, you'll implement structured information extraction from documents.
    ```bash
    python -m src.main
    ```
-
 
 **Key Concepts:**
 - Structured extraction with LLMs
@@ -169,17 +169,13 @@ History data for vessels and companies, including incidents and claims.
 
 In this step, you'll implement risk assessment using LLMs.
 
-1. Open `src/risk_assessor.py` and implement the assessment methods:
-   ```python
-   # TODO: Implement the assess_case method
-   ```
+1. Open `src/models.py` and add pydantic fields to the `Assessment` model.
 
-2. Update `src/main.py` to use your risk assessor:
-   ```python
-   # TODO: Use the Assessor to generate a risk assessment
-   ```
+2. Open `src/risk_assessor.py` and implement the assessment methods:
 
-3. Test your implementation:
+3. Update `src/main.py` to add a node for risk assessment:
+
+4. Test your implementation:
    ```bash
    python -m src.main
    ```
@@ -192,10 +188,6 @@ In this step, you'll implement risk assessment using LLMs.
 
 **Expected Output:**
 A structured assessment object containing a summary, recommendation, risk score, and points of attention.
-
-
-**Expected Output:**
-A complete workflow that processes documents, extracts information, looks up history, generates assessments, and creates a database entry.
 
 ## Project Structure
 
