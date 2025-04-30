@@ -1,41 +1,19 @@
 from langgraph.graph import StateGraph, END, START
 from src.document_processor import DocumentProcessor
-from src.information_extractor import InformationExtractor
 from src.workflow_state import WorkflowState
 
-
-"""Step 1: Process Documents"""
 def process_documents(state: WorkflowState):
     """Process the documents and add them to the state"""
     processor = DocumentProcessor()
-    documents = processor.process_documents(
-        pdf_paths=state.get("pdf_paths", []),
-        text_paths=state.get("text_paths", []),
-        excel_paths=state.get("excel_paths", [])
-    )
-    return {"documents": documents}
-
-def extract_information(state: WorkflowState):
-    """Extract key information from the documents"""
-    extractor = InformationExtractor()
-
-    # TODO: Run the extractions and return values to update state
+    # TODO: Call the document processor with the paths from the state
+    # and add the processed documents to the state
 
 def create_workflow():
     """Create the LangGraph workflow"""
-    # Create the graph
-    workflow = StateGraph(WorkflowState)
-
-    # Add nodes
-    workflow.add_node("process_documents", process_documents)
-    # TODO: add a node for information extraction
-
-    # Add edges
-    workflow.add_edge(START, "process_documents")
-    # TODO: Add the edge for information extraction
-
-    # Compile the graph
-    return workflow.compile()
+    # TODO: Create the graph
+    # TODO: Add the edge from START to the process_documents node, and to the END node.
+    # TODO: Return the compiled graph
+    pass
 
 def main():
     # Create the workflow
