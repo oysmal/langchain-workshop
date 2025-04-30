@@ -29,6 +29,10 @@ This workshop uses Devbox, which is an open source tool that gives you a shell w
 as the correct version of Python and a corresponding `venv`. (It does this declaratively by being built on the Nix package
 manager, which is very cool!)
 
+For windows users:
+- You must use Ubuntu Shell, not WSL. This can be installed via the Microsoft Store.
+- When you run pip install, you must use `DISPLAY= pip install -r requirements.txt`.
+
 1. Install Devbox (either):
 
    - (a). see [this official link](https://www.jetify.com/docs/devbox/installing_devbox)
