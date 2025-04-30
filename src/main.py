@@ -106,15 +106,15 @@ def create_workflow():
     workflow.add_node("process_documents", process_documents)
     workflow.add_node("extract_information", extract_information)
     workflow.add_node("lookup_history", lookup_history)
-    workflow.add_node("assess", Assessor().assess_case)
+    # TODO: Add assessment step here
     workflow.add_node("create_db_entry", create_db_entry)
 
     # Add edges
     workflow.add_edge(START, "process_documents")
     workflow.add_edge("process_documents", "extract_information")
     workflow.add_edge("extract_information", "lookup_history")
-    workflow.add_edge("lookup_history", "assess")
-    workflow.add_edge("assess", "create_db_entry")
+    workflow.add_edge("lookup_history", "create_db_entry")
+    # TODO: Add edge for assessment step here
     workflow.add_edge("create_db_entry", END)
 
     # Compile the graph

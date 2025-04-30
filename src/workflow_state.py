@@ -16,4 +16,3 @@ class WorkflowState(TypedDict, total=False):
     company_history: CompanyHistoryEntry
     vessel_histories: Dict[str, VesselHistoryEntry]
     assessment: Assessment
-    db_entry: DatabaseEntry

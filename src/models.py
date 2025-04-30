@@ -105,8 +105,5 @@ class DatabaseEntry(BaseModel):
 
 
 class Assessment(BaseModel):
-    request_summary: str = Field(description="Summary of the underwriting request")
-    recommendation: str = Field(description="AI recommendation regarding the case")
-    overall_risk_score: int = Field(description="Overall risk score from 1-10")
-    points_of_attention: List[str] = Field(description="List of points to pay attention to when reviewing")
-    risk_breakdown: RiskBreakdown = Field(default_factory=RiskBreakdown, description="Detailed risk breakdown")
+    """TODO: Fill out the assessment model with the fields you would like.
+    """
