@@ -57,36 +57,6 @@ class InformationExtractor:
             return model_class.model_validate(result)
         return result
 
-
-    def _create_extraction_chain(self, schema_class: type[T]) -> Any:
-        """Create an extraction chain for the given schema class
-
-        Args:
-            schema_class: A Pydantic model class to use for extraction
-
-        Returns:
-            A runnable chain that extracts information according to the schema and returns an instance of schema_class
-        """
-        prompt = ChatPromptTemplate.from_template(
-            """Extract the following information from the text below. The text may include content from PDF documents,
-            text files, and Excel spreadsheets, so please process all formats to find the requested information.
-
-            Detect the scale of each amount — units, thousands (K), millions (M), billions (B), etc.
-            Convert the figure to its exact “base-unit” value (the plain number of currency units).
-
-            {format_instructions}
-
-            Text: {input}"""
-        )
-
-        chain = (
-            {"input": RunnablePassthrough(), "format_instructions": lambda _: f"Extract information about {schema_class.__name__}"}
-            | prompt
-            | self.llm.with_structured_output(schema_class)
-        )
-
-        return chain
-
     def extract_entity_data(self, documents: List[Document]) -> EntityData:
         """Extract entity information including company, vessel, contact, and objects
 
@@ -96,9 +66,11 @@ class InformationExtractor:
         Returns:
             Extracted entity data
         """
-        extraction_chain = self._create_extraction_chain(EntityData)
         text_content = "\n\n".join([doc.page_content for doc in documents])
-        results = extraction_chain.invoke(text_content)
+        # TODO: Implement the extraction chain.
+        # You must create a prompt template and use the llm with structured output of the correct type
+        # in order to extract the information. 
+        results = None
         return self._ensure_pydantic_model(results, EntityData)
 
     def extract_financial_data(self, documents: List[Document]) -> FinancialData:
@@ -110,10 +82,12 @@ class InformationExtractor:
         Returns:
             Extracted financial data
         """
-        extraction_chain = self._create_extraction_chain(FinancialData)
         text_content = "\n\n".join([doc.page_content for doc in documents])
-        results = extraction_chain.invoke(text_content)
-        return self._ensure_pydantic_model(results, FinancialData)
+        # TODO: Implement the extraction chain.
+        # You must create a prompt template and use the llm with structured output of the correct type
+        # in order to extract the information. 
+        results = None
+        return self._ensure_pydantic_model(results, EntityData)
 
     def extract_insurance_data(self, documents: List[Document]) -> InsuranceData:
         """Extract insurance information including agreement, reinsurance, and offer
@@ -124,8 +98,9 @@ class InformationExtractor:
         Returns:
             Extracted insurance information
         """
-        extraction_chain = self._create_extraction_chain(InsuranceData)
         text_content = "\n\n".join([doc.page_content for doc in documents])
-        results = extraction_chain.invoke(text_content)
-        model = self._ensure_pydantic_model(results, InsuranceData)
-        return model
+        # TODO: Implement the extraction chain.
+        # You must create a prompt template and use the llm with structured output of the correct type
+        # in order to extract the information. 
+        results = None
+        return self._ensure_pydantic_model(results, EntityData)

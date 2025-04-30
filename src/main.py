@@ -1,7 +1,6 @@
 from langgraph.graph import StateGraph, END, START
 from src.document_processor import DocumentProcessor
 from src.information_extractor import InformationExtractor
-from src.history_lookup import VesselHistoryClient, CompanyHistoryClient
 from src.workflow_state import WorkflowState
 
 
@@ -20,25 +19,7 @@ def extract_information(state: WorkflowState):
     """Extract key information from the documents"""
     extractor = InformationExtractor()
 
-    entity_data = extractor.extract_entity_data(state["documents"])
-    financial_data = extractor.extract_financial_data(state["documents"])
-    insurance_data = extractor.extract_insurance_data(state["documents"])
-
-    # Return all extracted data
-    return {
-        "entity_data": entity_data,
-        "financial_data": financial_data,
-        "insurance_data": insurance_data
-    }
-
-def lookup_history(state: WorkflowState):
-    """Look up vessel and company history"""
-    vessel_client = VesselHistoryClient()
-    company_client = CompanyHistoryClient()
-
-    return None
-
-    # TODO: complete function
+    # TODO: Run the extractions and return values to update state
 
 def create_workflow():
     """Create the LangGraph workflow"""
@@ -47,15 +28,11 @@ def create_workflow():
 
     # Add nodes
     workflow.add_node("process_documents", process_documents)
-    workflow.add_node("extract_information", extract_information)
-    workflow.add_node("lookup_history", lookup_history)
-    # TODO: Add lookup_history node
+    # TODO: add a node for information extraction
 
     # Add edges
     workflow.add_edge(START, "process_documents")
-    workflow.add_edge("process_documents", "extract_information")
-    workflow.add_edge("extract_information", "lookup_history")
-    # TODO: Add edges for lookup_history
+    # TODO: Add the edge for information extraction
 
     # Compile the graph
     return workflow.compile()
