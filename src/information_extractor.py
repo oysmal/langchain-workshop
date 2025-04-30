@@ -2,10 +2,10 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, TypeVar, Any
+from typing import List, Optional, TypeVar, Any
 from langchain_core.documents import Document
 
-from src.models import RiskInfo
+from src.models import Agreement, RiskInfo, Premium, LossRatio, Reinsurance, Contact
 
 # Base schemas for combined extraction models
 class CompanyInfo(BaseModel):
@@ -21,52 +21,20 @@ class InsuranceOffer(BaseModel):
     premium_amount: Optional[float] = Field(description="The premium amount if specified")
     coverage_type: str = Field(description="Type of insurance coverage")
 
-class ContactInfo(BaseModel):
-    name: Optional[str] = Field(description="Contact name")
-    role: Optional[str] = Field(description="Contact role")
-    email: Optional[str] = Field(description="Contact email")
-    phone: Optional[str] = Field(description="Contact phone number")
-
-class AgreementInfo(BaseModel):
-    id: Optional[str] = Field(description="Agreement identifier")
-    name: Optional[str] = Field(description="Agreement name")
-    start_date: Optional[str] = Field(description="Start date of agreement validity")
-    end_date: Optional[str] = Field(description="End date of agreement validity")
-    products: Optional[List[str]] = Field(description="List of insurance products")
-    our_share: Optional[str] = Field(description="Our share percentage")
-    installments: Optional[int] = Field(description="Number of installments")
-    conditions: Optional[str] = Field(description="Agreement conditions")
-
-class PremiumInfo(BaseModel):
-    gross_premium: Optional[float] = Field(description="Gross premium amount")
-    brokerage_percent: Optional[float] = Field(description="Brokerage percentage")
-    net_premium: Optional[float] = Field(description="Net premium amount")
-
-class LossRatioInfo(BaseModel):
-    value_percent: Optional[float] = Field(description="Loss ratio percentage value")
-    claims: Optional[float] = Field(description="Claims amount")
-    premium: Optional[float] = Field(description="Premium amount")
-
-class ReinsuranceInfo(BaseModel):
-    net_tty: Optional[float] = Field(description="Net TTY amount")
-    net_fac: Optional[float] = Field(description="Net FAC amount")
-    net_retention: Optional[float] = Field(description="Net retention amount")
-    commission: Optional[float] = Field(description="Commission percentage")
-
-# Combined schema models for more efficient extraction
+    # Models for grouped extraction
 class EntityData(BaseModel):
     company_info: Optional[CompanyInfo] = Field(description="Company information")
     vessel_info: Optional[List[VesselInfo]] = Field(description="Vessel information")
-    contact_info: Optional[List[ContactInfo]] = Field(description="Contact information")
+    contact_info: Optional[List[Contact]] = Field(description="Contact information")
 
 class FinancialData(BaseModel):
-    premium_info: Optional[PremiumInfo] = Field(description="Premium information")
-    loss_ratio_info: Optional[LossRatioInfo] = Field(description="Loss ratio information")
+    premium_info: Optional[Premium] = Field(description="Premium information")
+    loss_ratio_info: Optional[LossRatio] = Field(description="Loss ratio information")
 
-class InsuranceRiskData(BaseModel):
-    agreement_info: Optional[AgreementInfo] = Field(description="Agreement information")
+class InsuranceData(BaseModel):
+    agreement_info: Optional[Agreement] = Field(description="Agreement information")
     risk_info: Optional[RiskInfo] = Field(description="Risk assessment information")
-    reinsurance_info: Optional[ReinsuranceInfo] = Field(description="Reinsurance information")
+    reinsurance_info: Optional[Reinsurance] = Field(description="Reinsurance information")
     insurance_offer: Optional[InsuranceOffer] = Field(description="Insurance offer details")
 
 class InformationExtractor:
@@ -147,7 +115,7 @@ class InformationExtractor:
         results = extraction_chain.invoke(text_content)
         return self._ensure_pydantic_model(results, FinancialData)
 
-    def extract_insurance_risk_data(self, documents: List[Document]) -> InsuranceRiskData:
+    def extract_insurance_data(self, documents: List[Document]) -> InsuranceData:
         """Extract insurance and risk information including agreement, risk assessment, reinsurance, and offer
 
         Args:
@@ -156,9 +124,8 @@ class InformationExtractor:
         Returns:
             Extracted insurance and risk data
         """
-        extraction_chain = self._create_extraction_chain(InsuranceRiskData)
+        extraction_chain = self._create_extraction_chain(InsuranceData)
         text_content = "\n\n".join([doc.page_content for doc in documents])
         results = extraction_chain.invoke(text_content)
-        model = self._ensure_pydantic_model(results, InsuranceRiskData)
-        print(f"Extracted Insurance Risk Data: {model.model_dump()}")
+        model = self._ensure_pydantic_model(results, InsuranceData)
         return model

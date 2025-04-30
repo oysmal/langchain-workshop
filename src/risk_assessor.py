@@ -1,7 +1,9 @@
-import json
+from typing import Dict
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from src.models import Assessment
+from src.workflow_state import WorkflowState
+
 class Assessor:
     def __init__(self, model_name="gpt-4.1"):
         self.llm = ChatOpenAI(model=model_name)
@@ -44,18 +46,18 @@ class Assessor:
         self.chain = self.prompt | self.llm.with_structured_output(Assessment)
 
 
-    def assess_case(self, state) -> Assessment:
+    def assess_case(self, state: WorkflowState) -> Dict[str, Assessment]:
         """Assess the case and generate insights"""
 
         # Extract data with safe defaults
         data = {
             "company_info": state["entity_data"].company_info,
             "vessel_info": [vessel.model_dump() for vessel in state["entity_data"].vessel_info],
-            "insurance_offer": state["insurance_risk_data"].insurance_offer,
+            "insurance_offer": state["insurance_data"].insurance_offer,
             "assessment": state.get("assessment", {}),
             "agreement": state.get("agreement_data", {}),
             "premium": state.get("premium_data", {}),
-            "risk": state.get("risk_data", {})
+            "risk": state["insurance_data"].risk_info
         }
 
         # Prepare the input data dictionary with string conversions
@@ -69,8 +71,6 @@ class Assessor:
             "risk": str(data["risk"]),
             "model_schema": Assessment.schema_json(indent=2)
         }
-        print(f"Input data for assessment: {json.dumps(input_data, indent=2)}")
 
-        res = self.chain.invoke(input_data)
-        print(f"Assessment result: {res}")
-        return res
+        assessment = self.chain.invoke(input_data)
+        return {"assessment": assessment} # Matches the workflow state

@@ -4,30 +4,30 @@ from typing import List, Optional, Dict
 # New models for the updated structure
 class Validity(BaseModel):
     """Validity period for an agreement"""
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    start_date: Optional[str] = Field(None, description="Start date of the agreement")
+    end_date: Optional[str] = Field(None, description="End date of the agreement")
 
 class Agreement(BaseModel):
     """Insurance agreement details"""
-    id: Optional[str] = None
-    name: Optional[str] = None
+    id: Optional[str] = Field(None, description="Agreement identifier")
+    name: Optional[str] = Field(None, description="Agreement name")
     validity: Validity = Field(default_factory=Validity)
-    products: List[str] = []
-    our_share: Optional[str] = None
-    installments: Optional[int] = None
-    conditions: Optional[str] = None
+    products: List[str] = Field(default_factory=list, description="List of insurance products")
+    our_share: Optional[str] = Field(None, description="Our share percentage")
+    installments: Optional[int] = Field(None, description="Number of installments")
+    conditions: Optional[str] = Field(None, description="Agreement conditions")
 
 class Premium(BaseModel):
     """Premium information"""
-    gross_premium: Optional[float] = None
-    brokerage_percent: Optional[float] = None
-    net_premium: Optional[float] = None
+    gross_premium: Optional[float] = Field(None, description="Gross premium amount")
+    brokerage_percent: Optional[float] = Field(None, description="Brokerage percentage")
+    net_premium: Optional[float] = Field(None, description="Net premium amount")
 
 class LossRatio(BaseModel):
     """Loss ratio information"""
-    value_percent: Optional[float] = None
-    claims: Optional[float] = None
-    premium: Optional[float] = None
+    value_percent: Optional[float] = Field(None, description="Loss ratio percentage value")
+    claims: Optional[float] = Field(None, description="Claims amount")
+    premium: Optional[float] = Field(None, description="Premium amount")
 
 class VesselClaimHistory(BaseModel):
     claim_vessel_name: str = Field(description="Name of the vessel involved in the claim")
@@ -36,28 +36,31 @@ class VesselClaimHistory(BaseModel):
     claim_amount: float = Field(description="Claim amount in standard resolution")
     claim_description: str = Field(description="Description of the claim")
 
-class RiskInfo(BaseModel):
-    claim_history: Optional[List[VesselClaimHistory]] = Field(description="List of claims related to the vessel")
+class RiskBreakdown(BaseModel):
     technical_condition: Optional[int] = Field(description="Technical condition risk score (1-10)")
     operational_quality: Optional[int] = Field(description="Operational quality risk score (1-10)")
     crew_quality: Optional[int] = Field(description="Crew quality risk score (1-10)")
     management_quality: Optional[int] = Field(description="Management quality risk score (1-10)")
     claims_history: Optional[int] = Field(description="Claims history risk score (1-10)")
     financial_stability: Optional[int] = Field(description="Financial stability risk score (1-10)")
+
+class RiskInfo(BaseModel):
+    claim_history: Optional[List[VesselClaimHistory]] = Field(description="List of claims related to the vessel")
     risk_score: Optional[int] = Field(description="Overall risk score (1-10)")
+    
 class Reinsurance(BaseModel):
     """Reinsurance information"""
-    net_tty: Optional[float] = None
-    net_fac: Optional[float] = None
-    net_retention: Optional[float] = None
-    commission: Optional[float] = None
+    net_tty: Optional[float] = Field(None, description="Net TTY amount")
+    net_fac: Optional[float] = Field(None, description="Net FAC amount")
+    net_retention: Optional[float] = Field(None, description="Net retention amount")
+    commission: Optional[float] = Field(None, description="Commission percentage")
 
 class Contact(BaseModel):
     """Contact information"""
-    name: Optional[str] = None
-    role: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
+    name: Optional[str] = Field(None, description="Contact name")
+    role: Optional[str] = Field(None, description="Contact role")
+    email: Optional[str] = Field(None, description="Contact email")
+    phone: Optional[str] = Field(None, description="Contact phone number")
 
 # New DatabaseEntry
 class DatabaseEntry(BaseModel):
@@ -75,6 +78,7 @@ class DatabaseEntry(BaseModel):
     request_summary: Optional[str] = None  # Summary of the underwriting request
     recommendation: Optional[str] = None   # AI recommendation regarding the case
     points_of_attention: List[str] = []  # Points to pay attention to when reviewing
+    risk_breakdown: RiskBreakdown = Field(default_factory=RiskBreakdown, description="Detailed risk breakdown")
 
 
 class Assessment(BaseModel):
@@ -82,3 +86,4 @@ class Assessment(BaseModel):
     recommendation: str = Field(description="AI recommendation regarding the case")
     overall_risk_score: int = Field(description="Overall risk score from 1-10")
     points_of_attention: List[str] = Field(description="List of points to pay attention to when reviewing")
+    risk_breakdown: RiskBreakdown = Field(default_factory=RiskBreakdown, description="Detailed risk breakdown")

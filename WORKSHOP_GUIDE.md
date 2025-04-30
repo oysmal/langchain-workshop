@@ -1,167 +1,286 @@
 # Maritime Insurance Processing Workshop Guide
 
-This guide will walk you through building a multi-step workflow using LangChain and LangGraph to process maritime insurance documents, extract key information, look up vessel and company history, and generate risk assessments.
+## Workshop Overview
 
-## Workshop Duration: 1.5 hours
+This hands-on workshop will guide you through building a multi-step workflow using LangChain and LangGraph to process maritime insurance documents, extract key information, look up vessel and company history, and generate risk assessments.
+
+## Workshop Duration: 2 hours
 
 ## Prerequisites
 
-- Python 3.13
+- Python 3.13+
 - Basic understanding of Python
-- Basic understanding of LangChain and LLMs
-- Familiarity with Python Pydantic models
-- OpenAI API key (set as environment variable `OPENAI_API_KEY`)
+- Familiarity with Pydantic models
+- OpenAI API key
 
-## Setup (10 minutes)
+## Workshop Structure
+
+```mermaid
+graph TD
+    A[Introduction & Setup] -->|20 min| B[Step 1: Hello World LangChain]
+    B -->|20 min| C[Step 2: Document Processing]
+    C -->|20 min| D[Step 3: Information Extraction]
+    D -->|20 min| E[Step 4: Custom Tools]
+    E -->|20 min| F[Step 5: Risk Assessment]
+    F -->|20 min| G[Step 6: Complete Workflow]
+```
+
+## Setup (Before Workshop)
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/oysmal/langchain-workshop.git
+   git clone https://github.com/oysmal/langchain-workshop-2.git
    cd langchain-workshop-2
    ```
 
-2. Install the required dependencies:
+2. Install Devbox (either):
+   - See [official instructions](https://www.jetify.com/docs/devbox/installing_devbox)
+   - Or, on Mac/Linux run:
+     ```bash
+     curl -fsSL https://get.jetify.com/devbox | bash
+     ```
+
+3. Set up your environment:
+   ```bash
+   cp .env.template .env.local
+   # Edit .env.local to add your OpenAI API key
+   ```
+
+4. Start the Devbox shell:
+   ```bash
+   devbox shell
+   ```
+
+5. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Set your OpenAI API key:
-   ```bash
-   export OPENAI_API_KEY=your-api-key-here
+## Introduction (20 minutes)
+
+The instructor will present:
+- Overview of LangChain and LangGraph
+- Key concepts and techniques
+- Maritime insurance processing workflow
+- Project structure and components
+
+## Step 1: Hello World LangChain (20 minutes)
+
+**Branch: `step-1-hello-world`**
+
+In this step, you'll create a simple LangChain application to understand the basics.
+
+1. Open `src/main.py` and implement a basic LangChain chain:
+   ```python
+   # TODO: Implement a basic LangChain chain that:
+   # 1. Takes a maritime insurance document as input
+   # 2. Uses an LLM to summarize the document
+   # 3. Returns the summary
    ```
 
-4. Create the sample PDF files:
+2. Test your implementation:
    ```bash
-   python utils/create_sample_pdfs.py
+   python -m src.main
    ```
-   
-   Note: Sample data files will be created in the src/data/ directory
+
+**Key Concepts:**
+- LangChain basics
+- ChatPromptTemplate
+- LLM integration
+- Basic chains
+
+**Expected Output:**
+A summary of the maritime insurance document that highlights key information such as the company name, vessels, and insurance details.
+
+## Step 2: Document Processing (20 minutes)
+
+**Branch: `step-2-document-processing`**
+
+In this step, you'll implement document processing to handle different file types.
+
+1. Open `src/document_processor.py` and implement the missing methods:
+   ```python
+   # TODO: Implement the load_pdf method
+   # TODO: Implement the load_text method
+   # TODO: Implement the load_excel method
+   # TODO: Implement the process_documents method
+   ```
+
+2. Update `src/main.py` to use your document processor:
+   ```python
+   # TODO: Use the DocumentProcessor to load and process documents
+   ```
+
+3. Test your implementation:
+   ```bash
+   python -m src.main
+   ```
+
+**Key Concepts:**
+- Document loaders from langchain_community
+- Handling different file types (PDF, text, Excel)
+- Document processing without chunking
+- Combining documents from multiple sources
+
+**Expected Output:**
+A list of Document objects containing the content from the PDF, text, and Excel files.
+
+## Step 3: Information Extraction (20 minutes)
+
+**Branch: `step-3-information-extraction`**
+
+In this step, you'll implement structured information extraction from documents.
+
+1. Open `src/information_extractor.py` and implement the extraction methods:
+   ```python
+   # TODO: Implement the _create_extraction_chain method
+   # TODO: Implement the extract_entity_data method
+   # TODO: Implement the extract_financial_data method
+   # TODO: Implement the extract_insurance_risk_data method
+   ```
+
+2. Update `src/main.py` to use your information extractor:
+   ```python
+   # TODO: Use the InformationExtractor to extract structured data
+   ```
+
+3. Test your implementation:
+   ```bash
+   python -m src.main
+   ```
+
+**Key Concepts:**
+- Structured extraction with LLMs
+- Pydantic models for validation
+- Extraction chains
+- Prompt engineering for extraction
+
+**Expected Output:**
+Structured data objects containing entity information (company, vessels), financial data (premium, loss ratio), and insurance risk data.
+
+## Step 4: Custom Tools (20 minutes)
+
+**Branch: `step-4-custom-tools`**
+
+In this step, you'll implement custom tools for looking up vessel and company history.
+
+1. Open `src/history_lookup.py` and implement the custom tools:
+   ```python
+   # TODO: Implement the VesselHistoryTool._run method
+   # TODO: Implement the CompanyHistoryTool._run method
+   ```
+
+2. Update `src/main.py` to use your custom tools:
+   ```python
+   # TODO: Use the custom tools to look up vessel and company history
+   ```
+
+3. Test your implementation:
+   ```bash
+   python -m src.main
+   ```
+
+**Key Concepts:**
+- Custom LangChain tools
+- Tool input schemas
+- Error handling in tools
+- Integrating external data sources (mock data in this case)
+
+**Expected Output:**
+History data for vessels and companies, including incidents and claims.
+
+## Step 5: Risk Assessment (20 minutes)
+
+**Branch: `step-5-risk-assessment`**
+
+In this step, you'll implement risk assessment using LLMs.
+
+1. Open `src/risk_assessor.py` and implement the assessment methods:
+   ```python
+   # TODO: Implement the assess_case method
+   ```
+
+2. Update `src/main.py` to use your risk assessor:
+   ```python
+   # TODO: Use the Assessor to generate a risk assessment
+   ```
+
+3. Test your implementation:
+   ```bash
+   python -m src.main
+   ```
+
+**Key Concepts:**
+- LLM chains with structured output
+- Prompt engineering for assessment
+- Using Pydantic models for structured outputs
+- Combining multiple data sources for assessment
+
+**Expected Output:**
+A structured assessment object containing a summary, recommendation, risk score, and points of attention.
+
+## Step 6: Complete Workflow (20 minutes)
+
+**Branch: `step-6-complete-workflow`**
+
+In this step, you'll build the complete workflow using LangGraph.
+
+1. Open `src/main.py` and implement the LangGraph workflow:
+   ```python
+   # TODO: Implement the create_workflow function
+   # TODO: Implement the main function to run the workflow
+   ```
+
+2. Test your implementation:
+   ```bash
+   python -m src.main
+   ```
+
+3. Visualize the workflow:
+   ```bash
+   python -m utils.graph_visualizer
+   ```
+
+**Key Concepts:**
+- LangGraph basics
+- StateGraph
+- Node functions
+- Graph compilation and execution
+- TypedDict for state management
+
+**Expected Output:**
+A complete workflow that processes documents, extracts information, looks up history, generates assessments, and creates a database entry.
 
 ## Project Structure
 
 The project is organized as follows:
 
-```bash
-langchain-workshop/
+```
+langchain-workshop-2/
 ├── README.md
 ├── requirements.txt
-├── test_workflow.py           # Main test script
 ├── WORKSHOP_GUIDE.md          # This guide
+├── test_workflow.py           # Test script
 ├── src/
 │   ├── __init__.py
+│   ├── main.py                # Entry point and workflow
 │   ├── document_processor.py  # Document loading and processing
-│   ├── information_extractor.py # Extract structured info from documents
+│   ├── information_extractor.py # Extract structured info
 │   ├── history_lookup.py      # Custom tools for lookups
 │   ├── risk_assessor.py       # Generate risk assessments
-│   ├── models.py              # Pydantic models for data
+│   ├── models.py              # Pydantic models
+│   ├── utils.py               # Utility functions
 │   └── data/                  # Sample data files
 │       ├── mock_data.py       # Mock data for lookups
-│       └── [sample files]     # PDF and text files
+│       └── [sample files]     # PDF, text, and Excel files
 └── utils/
-    ├── create_sample_pdfs.py  # Script to create sample PDFs
-    └── graph_visualizer.py    # Visualize the workflow graph
+    ├── create_sample_pdfs.py  # Create sample PDFs
+    └── graph_visualizer.py    # Visualize workflow graph
 ```
-
-## Workshop Modules
-
-### 1. Introduction (10 minutes)
-
-- Overview of the maritime insurance processing task
-- Introduction to LangChain and LangGraph
-- Overview of the LangChain ecosystem (Core, Community, OpenAI)
-- Explanation of the project structure
-
-### 2. Document Processing (15 minutes)
-
-In this module, we'll explore how to use LangChain document loaders to process PDF and text files.
-
-1. Open `src/document_processor.py`
-2. Review the `DocumentProcessor` class and its methods
-3. Understand how different document types are loaded and processed
-
-Key concepts:
-- LangChain document loaders from langchain_community
-- Document processing without chunking in this implementation
-- Handling multiple document types
-
-### 3. Information Extraction (15 minutes)
-
-In this module, we'll learn how to extract structured information from unstructured text using LangChain.
-
-1. Open `src/information_extractor.py`
-2. Review the extraction schemas defined using Pydantic
-3. Understand how structured output works with LLMs
-
-Key concepts:
-- Extraction using structured output
-- Pydantic schemas for structured data
-- Prompt engineering for extraction
-
-### 4. Custom Tools (15 minutes)
-
-In this module, we'll implement custom LangChain tools for looking up vessel and company history.
-
-1. Open `src/history_lookup.py`
-2. Review the custom tool implementations
-3. Understand how tools interact with mock data in `src/data/mock_data.py`
-
-Key concepts:
-- Custom LangChain tools
-- Tool input schemas
-- Error handling in tools
-
-### 5. Risk Assessment (15 minutes)
-
-In this module, we'll use LLM chains to generate risk assessments and summaries based on the extracted information and history lookups.
-
-1. Open `src/risk_assessor.py`
-2. Review the risk assessment implementation
-3. Understand how to use structured output for parsing LLM responses
-
-Key concepts:
-- LLM chains with structured output
-- Prompt engineering for assessment
-- Using Pydantic models for structured outputs
-
-### 6. Workflow Creation (15 minutes)
-
-In this module, we'll use LangGraph to create a multi-step workflow that ties all the components together.
-
-1. Open `src/main.py`
-2. Review the node functions and workflow creation
-3. Understand how data flows through the graph
-4. Note the use of TypedDict for state management
-
-Key concepts:
-- LangGraph state management with TypedDict
-- Node functions
-- Graph compilation and execution
-
-### 7. Testing and Demonstration (15 minutes)
-
-In this module, we'll run the complete workflow and analyze the results.
-
-1. Run the test script:
-   ```bash
-   python test_workflow.py
-   ```
-
-2. Review the output and understand how each component contributes to the final result
-
-3. Visualize the workflow graph:
-   ```bash
-   python utils/graph_visualizer.py
-   ```
-   This will create a JSON file at `utils/output/workflow_graph.json` that you can visualize using tools like https://jsoncrack.com/
-
-Key concepts:
-- End-to-end testing
-- Workflow visualization
-- Debugging and error handling
 
 ## Extensions and Next Steps
 
-Here are some ideas for extending the project after the workshop:
+If you finish early or want to continue exploring after the workshop:
 
 1. Add more sophisticated document processing (e.g., table extraction)
 2. Implement real API calls for vessel and company history lookups
@@ -169,8 +288,8 @@ Here are some ideas for extending the project after the workshop:
 4. Implement more complex risk assessment logic
 5. Add human-in-the-loop validation steps
 6. Implement database storage for the processed data
-7. Implement multi-vessel processing (the current implementation only processes one vessel)
-8. Add error handling and retry mechanisms for API calls
+7. Add error handling and retry mechanisms
+8. Implement multi-vessel processing
 
 ## Resources
 
@@ -184,14 +303,17 @@ Here are some ideas for extending the project after the workshop:
 
 ### Common Issues
 
-1. **Missing PDF Files**
-   If the test script reports missing PDF files, ensure you've run the `utils/create_sample_pdfs.py` script first.
+1. **OpenAI API Key**
+   If you encounter authentication errors, check that your OpenAI API key is correctly set in `.env.local`.
 
-2. **OpenAI API Key**
-   If you encounter authentication errors, check that your OpenAI API key is correctly set as an environment variable.
+2. **Import Errors**
+   Ensure you've installed all dependencies from requirements.txt.
 
-3. **Import Errors**
-   If you encounter import errors, ensure you've installed all dependencies from requirements.txt.
-
-4. **File Path Issues**
+3. **File Path Issues**
    The project uses relative paths from the project root. Always run scripts from the project root directory.
+
+4. **PDF Creation**
+   If you encounter issues with sample PDFs, ensure you've run the `utils/create_sample_pdfs.py` script.
+
+5. **Model Errors**
+   If you encounter errors related to the OpenAI model, check that you're using a supported model name in your code.
