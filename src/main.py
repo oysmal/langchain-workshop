@@ -1,15 +1,5 @@
-import os
-from pathlib import Path
-from dotenv import load_dotenv
-
-# Load environment variables from .env.local
-env_path = Path('.') / '.env.local'
-load_dotenv(dotenv_path=env_path)
-
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-
-
 
 def main():
     # TODO: Instantiate the ChatOpenAI LLM
