@@ -53,14 +53,16 @@ def lookup_history(state: WorkflowState):
     vessel_histories = {}
     if entity_data.vessel_info:
         vessel_histories = {
-            vessel.imo_number: vessel_client.get(vessel.imo_number)
+            vessel.imo_number: vessel_client.get(vessel.imo_number, vessel.vessel_name)
             for vessel in entity_data.vessel_info
         }
 
+    print(f"vessel_histories: {vessel_histories}")
     return {
         "company_history": company_history,
-        "vessel_histories_lookup": vessel_histories,
+        "vessel_histories": vessel_histories,
     }
+
 """/Step 2: Lookup History"""
 
 """Step 3: Assess Case and Create Database Entry"""
@@ -78,8 +80,10 @@ def create_db_entry(state: WorkflowState):
         "agreement": safe_model_dump(insurance_data.agreement_info),
         "premium": safe_model_dump(financial_data.premium_info),
         "loss_ratio": safe_model_dump(financial_data.loss_ratio_info),
-        "risk": safe_model_dump(insurance_data.risk_info),
         "objects": get_vessel_objects(entity_data),
+        "reported_vessel_claims_history": entity_data.claim_history,
+        "verified_vessel_claims_history": state["vessel_histories"],
+        "company_claims_history": state["company_history"],
         "reinsurance": safe_model_dump(insurance_data.reinsurance_info),
         "contacts": [contact.model_dump() for contact in entity_data.contact_info] if entity_data.contact_info else [],
         "recommendation": state["assessment"].recommendation if "assessment" in state else None,

@@ -2,7 +2,7 @@
 from typing import Dict, List, TypedDict
 from src.information_extractor import EntityData, FinancialData, InsuranceData
 from src.risk_assessor import Assessment
-from src.models import DatabaseEntry
+from src.models import CompanyHistoryEntry, DatabaseEntry, VesselHistoryEntry
 from langchain_core.documents import Document
 
 class WorkflowState(TypedDict, total=False):
@@ -13,7 +13,7 @@ class WorkflowState(TypedDict, total=False):
     entity_data: EntityData
     financial_data: FinancialData
     insurance_data: InsuranceData
-    company_history: Dict
-    vessel_histories: Dict[str, Dict]
+    company_history: CompanyHistoryEntry
+    vessel_histories: Dict[str, VesselHistoryEntry]
     assessment: Assessment
     db_entry: DatabaseEntry

@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, TypeVar, Any
 from langchain_core.documents import Document
 
-from src.models import Agreement, RiskInfo, Premium, LossRatio, Reinsurance, Contact
+from src.models import Agreement, Premium, LossRatio, Reinsurance, Contact, VesselClaimHistory
 
 # Base schemas for combined extraction models
 class CompanyInfo(BaseModel):
@@ -26,6 +26,7 @@ class EntityData(BaseModel):
     company_info: Optional[CompanyInfo] = Field(description="Company information")
     vessel_info: Optional[List[VesselInfo]] = Field(description="Vessel information")
     contact_info: Optional[List[Contact]] = Field(description="Contact information")
+    claim_history: Optional[List[VesselClaimHistory]] = Field(description="List of claims related to the vessels")
 
 class FinancialData(BaseModel):
     premium_info: Optional[Premium] = Field(description="Premium information")
@@ -33,7 +34,6 @@ class FinancialData(BaseModel):
 
 class InsuranceData(BaseModel):
     agreement_info: Optional[Agreement] = Field(description="Agreement information")
-    risk_info: Optional[RiskInfo] = Field(description="Risk assessment information")
     reinsurance_info: Optional[Reinsurance] = Field(description="Reinsurance information")
     insurance_offer: Optional[InsuranceOffer] = Field(description="Insurance offer details")
 
@@ -116,13 +116,13 @@ class InformationExtractor:
         return self._ensure_pydantic_model(results, FinancialData)
 
     def extract_insurance_data(self, documents: List[Document]) -> InsuranceData:
-        """Extract insurance and risk information including agreement, risk assessment, reinsurance, and offer
+        """Extract insurance information including agreement, reinsurance, and offer
 
         Args:
             documents: List of LangChain document objects
 
         Returns:
-            Extracted insurance and risk data
+            Extracted insurance information
         """
         extraction_chain = self._create_extraction_chain(InsuranceData)
         text_content = "\n\n".join([doc.page_content for doc in documents])

@@ -36,6 +36,12 @@ class VesselClaimHistory(BaseModel):
     claim_amount: float = Field(description="Claim amount in standard resolution")
     claim_description: str = Field(description="Description of the claim")
 
+class CompanyClaimHistory(BaseModel):
+    claim_company_name: str = Field(description="Name of the company involved in the claim")
+    claim_date: str = Field(description="Date of the claim")
+    claim_amount: float = Field(description="Claim amount in standard resolution")
+    claim_description: str = Field(description="Description of the claim")
+
 class RiskBreakdown(BaseModel):
     technical_condition: Optional[int] = Field(description="Technical condition risk score (1-10)")
     operational_quality: Optional[int] = Field(description="Operational quality risk score (1-10)")
@@ -62,16 +68,33 @@ class Contact(BaseModel):
     email: Optional[str] = Field(None, description="Contact email")
     phone: Optional[str] = Field(None, description="Contact phone number")
 
+class Incident(BaseModel):
+    date: str = Field(description="Date of the incident")
+    description: str = Field(description="Description of the incident")
+    severity: str = Field(description="Severity of the incident (e.g., minor, major, critical)")
+
+class VesselHistoryEntry(BaseModel):
+    incidents: List[Incident] = Field(default_factory=list, description="List of incidents related to the vessel")
+    claims: List[VesselClaimHistory] = Field(default_factory=list, description="List of claims related to the vessel")
+    message: str = Field(default="", description="Message regarding the vessel history lookup")
+
+class CompanyHistoryEntry(BaseModel):
+    incidents: List[Incident] = Field(default_factory=list, description="List of incidents related to the company")
+    claims: List[CompanyClaimHistory] =  Field(default_factory=list, description="List of claims related to the company")
+    message: str = Field(default="", description="Message regarding the company history lookup")
+
 # New DatabaseEntry
 class DatabaseEntry(BaseModel):
     """Final model for database entry"""
     agreement: Agreement = Field(default_factory=Agreement)
     premium: Premium = Field(default_factory=Premium)
     loss_ratio: LossRatio = Field(default_factory=LossRatio)
-    risk: RiskInfo = Field(default_factory=RiskInfo)
     objects: List[Dict] = []  # Objects associated with this entry
     reinsurance: Reinsurance = Field(default_factory=Reinsurance)
     contacts: List[Contact] = []
+    reported_vessel_claims_history: List[VesselClaimHistory] = Field(default_factory=list)  # Reported claims history for vessels
+    verified_vessel_claims_history: Dict[str, VesselHistoryEntry] = Field(default_factory=dict)  # Verified claims history for vessels
+    company_claims_history: CompanyHistoryEntry = Field(default_factory=CompanyHistoryEntry)  # Claims history for the company
 
     # Additional fields requested by the user
     overall_risk_score: Optional[int] = None  # Overall risk score from 1-10

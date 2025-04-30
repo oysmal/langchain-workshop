@@ -22,6 +22,15 @@ class Assessor:
         Vessel Information:
         {vessel_info}
 
+        Reported vessel claims history:
+        {vessel_claims_history}
+        
+        Verified vessel claims history, by lookup, (flag it if verified claims are not reported in the request):
+        {vessel_claims_lookup}
+
+        Verified company claims history:
+        {company_history}
+
         Insurance Offer:
         {insurance_offer}
 
@@ -33,9 +42,6 @@ class Assessor:
 
         Premium Information:
         {premium}
-
-        Risk Data:
-        {risk}
 
         Format your response as follows:
 
@@ -53,11 +59,13 @@ class Assessor:
         data = {
             "company_info": state["entity_data"].company_info,
             "vessel_info": [vessel.model_dump() for vessel in state["entity_data"].vessel_info],
+            "reported_claims_history": state["entity_data"].claim_history,
+            "vessel_claims_lookup": state["vessel_histories"],
+            "company_history": state["company_history"],
             "insurance_offer": state["insurance_data"].insurance_offer,
             "assessment": state.get("assessment", {}),
             "agreement": state.get("agreement_data", {}),
             "premium": state.get("premium_data", {}),
-            "risk": state["insurance_data"].risk_info
         }
 
         # Prepare the input data dictionary with string conversions
@@ -68,7 +76,9 @@ class Assessor:
             "assessment": str(data["assessment"]),
             "agreement": str(data["agreement"]),
             "premium": str(data["premium"]),
-            "risk": str(data["risk"]),
+            "vessel_claims_history": str(data["reported_claims_history"]),
+            "vessel_claims_lookup": str(data["vessel_claims_lookup"]),
+            "company_history": str(data["company_history"]),
             "model_schema": Assessment.schema_json(indent=2)
         }
 
