@@ -17,3 +17,4 @@ pydantic_core==2.27.2
 pypdf==5.4.0
 unstructured>=0.10.0
 networkx==3.4.2
+python-dotenv==1.0.1
