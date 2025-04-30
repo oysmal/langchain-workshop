@@ -1,3 +1,11 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env.local
+env_path = Path('.') / '.env.local'
+load_dotenv(dotenv_path=env_path)
+
 from langgraph.graph import StateGraph, END, START
 from src.document_processor import DocumentProcessor
 from src.information_extractor import InformationExtractor
