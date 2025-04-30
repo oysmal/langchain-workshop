@@ -1,8 +1,7 @@
 
 from typing import Dict, List, TypedDict
 from src.information_extractor import EntityData, FinancialData, InsuranceData
-from src.risk_assessor import Assessment
-from src.models import CompanyHistoryEntry, DatabaseEntry, VesselHistoryEntry
+from src.models import CompanyHistoryEntry, VesselHistoryEntry
 from langchain_core.documents import Document
 
 class WorkflowState(TypedDict, total=False):
@@ -13,6 +12,4 @@ class WorkflowState(TypedDict, total=False):
     entity_data: EntityData
     financial_data: FinancialData
     insurance_data: InsuranceData
-    company_history: CompanyHistoryEntry
-    vessel_histories: Dict[str, VesselHistoryEntry]
-    assessment: Assessment
+    # TODO: Add company and vessel histories to state. Hint: VesselHistoryEntry should be the type of the value in a Dict

@@ -103,7 +103,3 @@ class DatabaseEntry(BaseModel):
     points_of_attention: List[str] = []  # Points to pay attention to when reviewing
     risk_breakdown: RiskBreakdown = Field(default_factory=RiskBreakdown, description="Detailed risk breakdown")
 
-
-class Assessment(BaseModel):
-    """TODO: Fill out the assessment model with the fields you would like.
-    """

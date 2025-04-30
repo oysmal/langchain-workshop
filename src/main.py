@@ -2,10 +2,7 @@ from langgraph.graph import StateGraph, END, START
 from src.document_processor import DocumentProcessor
 from src.information_extractor import InformationExtractor
 from src.history_lookup import VesselHistoryClient, CompanyHistoryClient
-from src.risk_assessor import Assessor
-from src.models import DatabaseEntry
 from src.workflow_state import WorkflowState
-from src.utils import get_vessel_objects, safe_model_dump
 
 
 """Step 1: Process Documents"""
@@ -33,69 +30,15 @@ def extract_information(state: WorkflowState):
         "financial_data": financial_data,
         "insurance_data": insurance_data
     }
-"""/Step 1: Process Documents"""
 
-"""Step 2: Lookup History"""
 def lookup_history(state: WorkflowState):
     """Look up vessel and company history"""
     vessel_client = VesselHistoryClient()
     company_client = CompanyHistoryClient()
 
-    # Get entity data with safe default
-    entity_data = state.get("entity_data", {})
-    
-    # Handle CompanyInfo with safe access
-    company_info = entity_data.company_info
-    company_name = company_info.company_name if company_info else "Unknown Company"
-    company_history = company_client.get(company_name)
+    return None
 
-    # Handle vessel info with simplified approach
-    vessel_histories = {}
-    if entity_data.vessel_info:
-        vessel_histories = {
-            vessel.imo_number: vessel_client.get(vessel.imo_number, vessel.vessel_name)
-            for vessel in entity_data.vessel_info
-        }
-
-    return {
-        "company_history": company_history,
-        "vessel_histories": vessel_histories,
-    }
-
-"""/Step 2: Lookup History"""
-
-"""Step 3: Assess Case and Create Database Entry"""
-
-def create_db_entry(state: WorkflowState):
-    """Create the final database entry"""
-    
-    # Extract data from state with safe defaults
-    entity_data = state.get("entity_data", None)
-    financial_data = state.get("financial_data", {})
-    insurance_data = state.get("insurance_data", {})
-    
-    # Create db_entry_data dictionary with all components
-    db_entry_data = {
-        "agreement": safe_model_dump(insurance_data.agreement_info),
-        "premium": safe_model_dump(financial_data.premium_info),
-        "loss_ratio": safe_model_dump(financial_data.loss_ratio_info),
-        "objects": get_vessel_objects(entity_data),
-        "reported_vessel_claims_history": entity_data.claim_history,
-        "verified_vessel_claims_history": state["vessel_histories"],
-        "company_claims_history": state["company_history"],
-        "reinsurance": safe_model_dump(insurance_data.reinsurance_info),
-        "contacts": [contact.model_dump() for contact in entity_data.contact_info] if entity_data.contact_info else [],
-        "recommendation": state["assessment"].recommendation if "assessment" in state else None,
-        "risk_breakdown": state["assessment"].risk_breakdown if "assessment" in state else None,
-        "overall_risk_score": state["assessment"].overall_risk_score if "assessment" in state else None,
-        "points_of_attention": state["assessment"].points_of_attention if "assessment" in state else None,
-        "request_summary": state["assessment"].request_summary if "assessment" in state else None,
-    }
-    
-    # Create the database entry using model_validate
-    db_entry = DatabaseEntry.model_validate(db_entry_data)
-    
-    return {"db_entry": db_entry}
+    # TODO: complete function
 
 def create_workflow():
     """Create the LangGraph workflow"""
@@ -106,16 +49,13 @@ def create_workflow():
     workflow.add_node("process_documents", process_documents)
     workflow.add_node("extract_information", extract_information)
     workflow.add_node("lookup_history", lookup_history)
-    # TODO: Add assessment step here
-    workflow.add_node("create_db_entry", create_db_entry)
+    # TODO: Add lookup_history node
 
     # Add edges
     workflow.add_edge(START, "process_documents")
     workflow.add_edge("process_documents", "extract_information")
     workflow.add_edge("extract_information", "lookup_history")
-    workflow.add_edge("lookup_history", "create_db_entry")
-    # TODO: Add edge for assessment step here
-    workflow.add_edge("create_db_entry", END)
+    # TODO: Add edges for lookup_history
 
     # Compile the graph
     return workflow.compile()
@@ -141,13 +81,7 @@ def main():
 
     # Execute the workflow
     result = workflow.invoke(inputs)
-
-    # Get the database entry
-    db_entry = result["db_entry"]
-
-    # Convert to JSON and print
-    db_entry_json = db_entry.model_dump_json(indent=2)
-    print(db_entry_json)
+    print("Workflow result:", result)
 
 if __name__ == "__main__":
     main()
