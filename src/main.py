@@ -57,7 +57,6 @@ def lookup_history(state: WorkflowState):
             for vessel in entity_data.vessel_info
         }
 
-    print(f"vessel_histories: {vessel_histories}")
     return {
         "company_history": company_history,
         "vessel_histories": vessel_histories,
