@@ -1,15 +1,15 @@
 from langchain_community.document_loaders import PyPDFLoader, TextLoader, UnstructuredExcelLoader
 
 class DocumentProcessor:
-    def load_pdf(self, file_path):
-        """Load a PDF file and split into chunks"""
-        loader = PyPDFLoader(file_path)
-        documents = loader.load()
-        return documents
-
     def load_text(self, file_path):
         """Load a text file"""
         loader = TextLoader(file_path)
+        documents = loader.load()
+        return documents
+
+    def load_pdf(self, file_path):
+        """Load a PDF file and split into chunks"""
+        loader = PyPDFLoader(file_path)
         documents = loader.load()
         return documents
 

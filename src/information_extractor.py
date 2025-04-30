@@ -43,36 +43,6 @@ class InformationExtractor:
 
     T = TypeVar('T', bound=BaseModel)
 
-    def _create_extraction_chain(self, schema_class: type[T]) -> Any:
-        """Create an extraction chain for the given schema class
-
-        Args:
-            schema_class: A Pydantic model class to use for extraction
-
-        Returns:
-            A runnable chain that extracts information according to the schema and returns an instance of schema_class
-        """
-        prompt = ChatPromptTemplate.from_template(
-            """Extract the following information from the text below. The text may include content from PDF documents,
-            text files, and Excel spreadsheets, so please process all formats to find the requested information.
-
-            You must identify the monetary resolution of each amount, e.g. Actual amount (1), 1 Million, 1 Billion.
-            When responding you should always provide the full information in standard (actual amount) resolution.
-            You must transform the amount if it is not in standard resolution.
-
-            {format_instructions}
-
-            Text: {input}"""
-        )
-
-        chain = (
-            {"input": RunnablePassthrough(), "format_instructions": lambda _: f"Extract information about {schema_class.__name__}"}
-            | prompt
-            | self.llm.with_structured_output(schema_class)
-        )
-
-        return chain
-
     def _ensure_pydantic_model(self, result: Any, model_class: type[T]) -> T:
         """Ensure the result is a Pydantic model of the specified class
 
@@ -86,6 +56,36 @@ class InformationExtractor:
         if isinstance(result, dict):
             return model_class.model_validate(result)
         return result
+
+
+    def _create_extraction_chain(self, schema_class: type[T]) -> Any:
+        """Create an extraction chain for the given schema class
+
+        Args:
+            schema_class: A Pydantic model class to use for extraction
+
+        Returns:
+            A runnable chain that extracts information according to the schema and returns an instance of schema_class
+        """
+        prompt = ChatPromptTemplate.from_template(
+            """Extract the following information from the text below. The text may include content from PDF documents,
+            text files, and Excel spreadsheets, so please process all formats to find the requested information.
+
+            Detect the scale of each amount — units, thousands (K), millions (M), billions (B), etc.
+            Convert the figure to its exact “base-unit” value (the plain number of currency units).
+
+            {format_instructions}
+
+            Text: {input}"""
+        )
+
+        chain = (
+            {"input": RunnablePassthrough(), "format_instructions": lambda _: f"Extract information about {schema_class.__name__}"}
+            | prompt
+            | self.llm.with_structured_output(schema_class)
+        )
+
+        return chain
 
     def extract_entity_data(self, documents: List[Document]) -> EntityData:
         """Extract entity information including company, vessel, contact, and objects
